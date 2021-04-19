@@ -1,5 +1,3 @@
-
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -52,6 +50,19 @@ int main() {
         return -1;
     }
 
+    //Initial color of background
+    glClearColor(0.2,0.4,0.7,1.0);
+
+    //Rendering loop
+    while(!glfwWindowShouldClose(window)){
+        processInput(window);
+
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
     glfwTerminate();
     return 0;
 }
@@ -77,5 +88,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-  
+
+
 }
