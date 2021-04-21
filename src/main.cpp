@@ -16,18 +16,29 @@ void processInput(GLFWwindow *window);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 //Vectors of camera
-glm::vec3 cameraPos = glm::vec3(0.0, 0.7, 3.0);
+glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
 
 //timing
 float delta_time = 0.0f;
 float last_frame = 0.0f;
+
+float lastX = 400;
+float lastY = 300;
+bool firstMouse = true;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float fov = 45.0f;
+
 
 int main() {
     // glfw: initialize and configure
@@ -36,6 +47,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -53,7 +65,10 @@ int main() {
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -89,13 +104,13 @@ int main() {
     };
 
     float ground[] = {
-            5.0f, 0.0f,  5.0f,  2.0f, 0.0f,
-            -5.0f, 0.0f,  5.0f,  0.0f, 0.0f,
-            -5.0f, 0.0f, -5.0f,  0.0f, 2.0f,
+            50.0f, 0.0f,  50.0f,  50.0f, 0.0f,
+            -50.0f, 0.0f,  50.0f,  0.0f, 0.0f,
+            -50.0f, 0.0f, -50.0f,  0.0f, 50.0f,
 
-            5.0f, 0.0f,  5.0f,  2.0f, 0.0f,
-            -5.0f, 0.0f, -5.0f,  0.0f, 2.0f,
-            5.0f, 0.0f, -5.0f,  2.0f, 2.0f
+            50.0f, 0.0f,  50.0f,  50.0f, 0.0f,
+            -50.0f, 0.0f, -50.0f,  0.0f, 50.0f,
+            50.0f, 0.0f, -50.0f,  50.0f, 50.0f
 
     };
 
@@ -148,15 +163,15 @@ int main() {
     //Create shaders
     Shader shader_pyramid = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
     Shader ground_shader = Shader(FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
-
+    Shader velika_piramida = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
     //Pyramid texture
-    Texture2D texture_pyramid = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    Texture2D texture_pyramid = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
     texture_pyramid.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
     texture_pyramid.reflect_vertically();
     texture_pyramid.free_data();
 
     //Sand texture
-    Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
     texture_pyramid.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
     texture_pyramid.reflect_vertically();
     texture_pyramid.free_data();
@@ -180,6 +195,7 @@ int main() {
         //Create model matrix
         glm::mat4 model = glm::mat4(1.0f);
 
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
         //Create view matrix
         glm::mat4 view = glm::mat4(1.0f);
 
@@ -187,7 +203,7 @@ int main() {
         view = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
 
         //Create projection matrix
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
 
         //Set matrices for pyramid
         shader_pyramid.use();
@@ -198,17 +214,42 @@ int main() {
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
 
+
+        //odavde
+        glBindVertexArray(0);
+
+        glm::mat4 model_velika = glm::mat4(1.0f);
+        model_velika = glm::translate(model_velika, glm::vec3(5.0f, 0.0f, -5.0f));
+        model_velika = glm::scale(model_velika, glm::vec3(4.0f, 4.0f, 4.0f));
+        velika_piramida.use();
+        velika_piramida.setMat4("model", model_velika);
+        velika_piramida.setMat4("view", view);
+        velika_piramida.setMat4("projection", projection);
+
+        velika_piramida.setInt("texture_pyramid", 0);
+        texture_pyramid.activate(GL_TEXTURE0);
+
+        glBindVertexArray(VAOs[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 12);
         //set matrices for ground
         ground_shader.use();
         shader_pyramid.setMat4("model", model);
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
+
+        glm::mat4 ground_model = glm::mat4(1.0f);
+//        ground_model = glm::scale(ground_model, glm::vec3(10.0f, 1.0f, 10.0f));
+
+        ground_shader.setMat4("model", ground_model);
+        ground_shader.setMat4("view", view);
+        ground_shader.setMat4("projection", projection);
         //activate sand texture
         ground_shader.setInt("texture_sand", 0);
         sand_texture.activate(GL_TEXTURE0);
@@ -231,7 +272,16 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    const float cameraSpeed = 2.0 * delta_time;
+
+
+    const float cameraSpeed = 10.0 * delta_time;
+
+    //da ne ide kamera ispod y ose
+
+    if (cameraPos.y  < 0)
+    {
+        cameraPos.y +=cameraSpeed;
+    }
 
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
         cameraPos += cameraFront * cameraSpeed;
@@ -282,4 +332,46 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 //        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 //    }
 
+}
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.02f; // change this value to your liking
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    fov -= (float)yoffset;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov > 45.0f)
+        fov = 45.0f;
 }
