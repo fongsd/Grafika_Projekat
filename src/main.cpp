@@ -11,17 +11,14 @@
 #include <rg/Texture2D.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-
 void processInput(GLFWwindow *window);
-
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+//TODO podesiti velicinu ekrana na rezoluciju ekrana umesto hard kodovati
+const unsigned int SCR_WIDTH = 1980;
+const unsigned int SCR_HEIGHT = 1024;
 
 //Vectors of camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
@@ -32,8 +29,8 @@ glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
 float delta_time = 0.0f;
 float last_frame = 0.0f;
 
-float lastX = 400;
-float lastY = 300;
+float lastX = SCR_WIDTH / 2.0;
+float lastY = SCR_HEIGHT / 2.0;
 bool firstMouse = true;
 float yaw = -90.0f;
 float pitch = 0.0f;
@@ -68,7 +65,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -104,13 +101,13 @@ int main() {
     };
 
     float ground[] = {
-            50.0f, 0.0f,  50.0f,  50.0f, 0.0f,
-            -50.0f, 0.0f,  50.0f,  0.0f, 0.0f,
-            -50.0f, 0.0f, -50.0f,  0.0f, 50.0f,
+            150.0f, 0.0f,  150.0f,  150.0f, 0.0f,
+            -150.0f, 0.0f,  150.0f,  0.0f, 0.0f,
+            -150.0f, 0.0f, -150.0f,  0.0f, 150.0f,
 
-            50.0f, 0.0f,  50.0f,  50.0f, 0.0f,
-            -50.0f, 0.0f, -50.0f,  0.0f, 50.0f,
-            50.0f, 0.0f, -50.0f,  50.0f, 50.0f
+            150.0f, 0.0f,  150.0f,  150.0f, 0.0f,
+            -150.0f, 0.0f, -150.0f,  0.0f, 150.0f,
+            150.0f, 0.0f, -150.0f,  150.0f, 150.0f
 
     };
 
@@ -219,7 +216,6 @@ int main() {
 
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
-
 
         //odavde
         glBindVertexArray(0);
@@ -331,6 +327,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 //    if(key == GLFW_KEY_A && action == GLFW_PRESS){
 //        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 //    }
+    if(key == GLFW_KEY_F && action == GLFW_PRESS){
+        //TODO: Uraditi fullscreen dugme
+    }
 
 }
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -347,7 +346,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    float sensitivity = 0.02f; // change this value to your liking
+    float sensitivity = 0.1f; // change this value to your liking
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
