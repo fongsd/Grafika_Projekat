@@ -89,13 +89,13 @@ int main() {
     };
 
     float ground[] = {
-        -0.9, 0.0, -0.9, 0.0, 0.0,//bottom-left 0
-        -0.9, 0.0, 0.9, 1.0, 0.0,//bottom-right 1
-        0.9, 0.0, 0.9, 1.0, 1.0,//top-right 2
+            5.0f, 0.0f,  5.0f,  2.0f, 0.0f,
+            -5.0f, 0.0f,  5.0f,  0.0f, 0.0f,
+            -5.0f, 0.0f, -5.0f,  0.0f, 2.0f,
 
-        -0.9, 0.0, -0.9, 0.0, 0.0,//bottom-left 0
-        0.9, 0.0, 0.9, 1.0, 1.0,//top-right 2
-        0.9, 0.0, -0.9, 0.0, 1.0,//top-left 3
+            5.0f, 0.0f,  5.0f,  2.0f, 0.0f,
+            -5.0f, 0.0f, -5.0f,  0.0f, 2.0f,
+            5.0f, 0.0f, -5.0f,  2.0f, 2.0f
 
     };
 
@@ -179,8 +179,6 @@ int main() {
 
         //Create model matrix
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-        //model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 0.5f, 0.3f));
 
         //Create view matrix
         glm::mat4 view = glm::mat4(1.0f);
@@ -197,12 +195,6 @@ int main() {
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
-        ground_shader.use();
-        shader_pyramid.setMat4("model", model);
-        shader_pyramid.setMat4("view", view);
-        shader_pyramid.setMat4("projection", projection);
-
-        shader_pyramid.use();
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
@@ -211,16 +203,15 @@ int main() {
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
 
-        //activate sand texture
+        //set matrices for ground
         ground_shader.use();
+        shader_pyramid.setMat4("model", model);
+        shader_pyramid.setMat4("view", view);
+        shader_pyramid.setMat4("projection", projection);
+
+        //activate sand texture
         ground_shader.setInt("texture_sand", 0);
         sand_texture.activate(GL_TEXTURE0);
-
-        glm::mat4 ground_model = glm::mat4(1.0f);
-        ground_model = glm::scale(ground_model, glm::vec3(100.0f, 1.0f, 100.0f));
-
-        ground_shader.use();
-        ground_shader.setMat4("model", ground_model);
 
         glBindVertexArray(VAOs[1]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -256,7 +247,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
-    const float cameraSpeed = 5.0 * delta_time;
+    const float cameraSpeed = 25.0 * delta_time;
 
     if(key == GLFW_KEY_W && action == GLFW_PRESS){
         cameraPos += cameraFront * cameraSpeed;
