@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
-
+#include <learnopengl/filesystem.h>
 #include <rg/Shader.h>
 #include <rg/Texture2D.h>
 
@@ -146,18 +146,18 @@ int main() {
     glBindVertexArray(0);
 
     //Create shaders
-    Shader shader_pyramid = Shader("/home/igor/Desktop/Grafika_projekat/resources/shaders/pyramid.vert", "/home/igor/Desktop/Grafika_projekat/resources/shaders/pyramid.frag");
-    Shader ground_shader = Shader("/home/igor/Desktop/Grafika_projekat/resources/shaders/ground_shader.vert","/home/igor/Desktop/Grafika_projekat/resources/shaders/ground_shader.frag");
+    Shader shader_pyramid = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
+    Shader ground_shader = Shader(FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
 
     //Pyramid texture
     Texture2D texture_pyramid = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-    texture_pyramid.load("/home/igor/Desktop/Grafika_projekat/resources/textures/pyramid.jpg", GL_RGB);
+    texture_pyramid.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
     texture_pyramid.reflect_vertically();
     texture_pyramid.free_data();
 
     //Sand texture
     Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-    texture_pyramid.load("/home/igor/Desktop/Grafika_projekat/resources/textures/sand.jpg", GL_RGB);
+    texture_pyramid.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
     texture_pyramid.reflect_vertically();
     texture_pyramid.free_data();
 
@@ -231,6 +231,23 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    const float cameraSpeed = 2.0 * delta_time;
+
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        cameraPos += cameraFront * cameraSpeed;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        cameraPos -= cameraFront * cameraSpeed;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -247,22 +264,22 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
-    const float cameraSpeed = 25.0 * delta_time;
-
-    if(key == GLFW_KEY_W && action == GLFW_PRESS){
-        cameraPos += cameraFront * cameraSpeed;
-    }
-
-    if(key == GLFW_KEY_S && action == GLFW_PRESS){
-        cameraPos -= cameraFront * cameraSpeed;
-    }
-
-    if(key == GLFW_KEY_D && action == GLFW_PRESS){
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    }
-
-    if(key == GLFW_KEY_A && action == GLFW_PRESS){
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    }
+//    const float cameraSpeed = 25.0 * delta_time;
+//
+//    if(key == GLFW_KEY_W && action == GLFW_PRESS){
+//        cameraPos += cameraFront * cameraSpeed;
+//    }
+//
+//    if(key == GLFW_KEY_S && action == GLFW_PRESS){
+//        cameraPos -= cameraFront * cameraSpeed;
+//    }
+//
+//    if(key == GLFW_KEY_D && action == GLFW_PRESS){
+//        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+//    }
+//
+//    if(key == GLFW_KEY_A && action == GLFW_PRESS){
+//        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+//    }
 
 }

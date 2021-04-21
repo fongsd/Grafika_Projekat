@@ -7,6 +7,6 @@ uniform sampler2D texture_pyramid;
 
 void main()
 {
-    fragColor = texture(texture_pyramid, texCords);
+    fragColor = texture(texture_pyramid, texCords) * 0.6;
     //fragColor = vec4(7.0, 4.0, 3.0, 1.0);
 }
