@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include <rg/Shader.h>
+#include <rg/Texture2D.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -19,6 +20,14 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+//Vectors of camera
+glm::vec3 cameraPos = glm::vec3(0.0, 0.7, 3.0);
+glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
+glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
+
+//timing
+float delta_time = 0.0f;
+float last_frame = 0.0f;
 
 int main() {
     // glfw: initialize and configure
@@ -40,10 +49,10 @@ int main() {
         glfwTerminate();
         return -1;
     }
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
-    // tell GLFW to capture our mouse
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -51,63 +60,176 @@ int main() {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
-    float vertices[] = {
-        -0.5, -0.5, 0.0,
-        0.5, -0.5, 0.0,
-        0.0, 0.5, 0.0,
-        0.0, 0.0, 0.5
+
+    float pyramid[] = {
+//        -0.5, 0.0, -0.5, 0.0, 0.0, //bottom-left 0
+//        -0.5, 0.0, 0.5, 1.0, 0.0,//bottom-right 1
+//        0.5, 0.0, 0.5, 0.0, 1.0,//top-right 2
+
+//        -0.5, 0.0, -0.5, 0.0, 0.0,//bottom-left 0
+//        0.5, 0.0, 0.5, 0.0, 1.0,//top-right 2
+//        0.5, 0.0, -0.5, 1.0, 1.0,//top-left 3
+
+        -0.5, 0.0, -0.5, 0.0, 0.0, //bottom-left 0
+        -0.5, 0.0, 0.5, 1.0, 0.0,//bottom-right 1
+        0.0, 0.6, 0.0, 0.5, 1.0,//peek 4
+
+        -0.5, 0.0, 0.5, 0.0, 0.0,//bottom-right 1
+        0.5, 0.0, 0.5, 1.0, 0.0,//top-right 2
+        0.0, 0.6, 0.0, 0.5, 1.0,//peek 4
+
+        0.5, 0.0, 0.5, 0.0, 0.0,//top-right 2
+        0.5, 0.0, -0.5, 1.0, 0.0,//top-left 3
+        0.0, 0.6, 0.0, 0.5, 1.0,//peek 4
+
+        0.5, 0.0, -0.5, 0.0, 0.0,//top-left 3
+        -0.5, 0.0, -0.5, 1.0, 0.0,//bottom-left 0
+        0.0, 0.6, 0.0, 0.5, 1.0//peek 4
+
     };
 
-    unsigned indices[] = {
-        0, 1, 3,
-        1, 2, 3,
-        2, 0, 3,
-        0, 1, 2
+    float ground[] = {
+        -0.9, 0.0, -0.9, 0.0, 0.0,//bottom-left 0
+        -0.9, 0.0, 0.9, 1.0, 0.0,//bottom-right 1
+        0.9, 0.0, 0.9, 1.0, 1.0,//top-right 2
+
+        -0.9, 0.0, -0.9, 0.0, 0.0,//bottom-left 0
+        0.9, 0.0, 0.9, 1.0, 1.0,//top-right 2
+        0.9, 0.0, -0.9, 0.0, 1.0,//top-left 3
+
+    };
+
+    unsigned indices_pyramid[] = {
+        0, 1, 2,
+        0, 2, 3,
+        0, 1, 4,
+        1, 2, 4,
+        2, 3, 4,
+        3, 0, 4
+    };
+
+    unsigned indices_ground[] = {
+        0, 1, 2,
+        0, 2, 3
     };
 
     //Vertex Buffer Object & Vertex Array Object
-    unsigned VBO, VAO, EBO;
+    unsigned VBOs[2], VAOs[2];
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    glGenVertexArrays(2, VAOs);
+    glGenBuffers(2, VBOs);
 
-    glBindVertexArray(VAO);
+    //pyramid
+    glBindVertexArray(VAOs[0]);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pyramid), pyramid, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
-//    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    Shader shader = Shader("/home/igor/Desktop/Grafika_projekat/resources/shaders/pyramid.vert", "/home/igor/Desktop/Grafika_projekat/resources/shaders/pyramid.frag");
-    shader.use();
+    //sand
+    glBindVertexArray(VAOs[1]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(ground), ground, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+
+    //Create shaders
+    Shader shader_pyramid = Shader("/home/igor/Desktop/Grafika_projekat/resources/shaders/pyramid.vert", "/home/igor/Desktop/Grafika_projekat/resources/shaders/pyramid.frag");
+    Shader ground_shader = Shader("/home/igor/Desktop/Grafika_projekat/resources/shaders/ground_shader.vert","/home/igor/Desktop/Grafika_projekat/resources/shaders/ground_shader.frag");
+
+    //Pyramid texture
+    Texture2D texture_pyramid = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    texture_pyramid.load("/home/igor/Desktop/Grafika_projekat/resources/textures/pyramid.jpg", GL_RGB);
+    texture_pyramid.reflect_vertically();
+    texture_pyramid.free_data();
+
+    //Sand texture
+    Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    texture_pyramid.load("/home/igor/Desktop/Grafika_projekat/resources/textures/sand.jpg", GL_RGB);
+    texture_pyramid.reflect_vertically();
+    texture_pyramid.free_data();
 
     //Initial color of background
     glClearColor(0.2,0.4,0.7,1.0);
 
+    //Enabling depth testing
+    glEnable(GL_DEPTH_TEST);
+
     //Rendering loop
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
         processInput(window);
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        //frame-time logic
+        float current_frame = glfwGetTime();
+        delta_time = current_frame - last_frame;
+        last_frame = current_frame;
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+        //Create model matrix
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+        //model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 0.5f, 0.3f));
+
+        //Create view matrix
+        glm::mat4 view = glm::mat4(1.0f);
+
+        //Create view matrix
+        view = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
+
+        //Create projection matrix
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
+
+        //Set matrices for pyramid
+        shader_pyramid.use();
+        shader_pyramid.setMat4("model", model);
+        shader_pyramid.setMat4("view", view);
+        shader_pyramid.setMat4("projection", projection);
+
+        ground_shader.use();
+        shader_pyramid.setMat4("model", model);
+        shader_pyramid.setMat4("view", view);
+        shader_pyramid.setMat4("projection", projection);
+
+        shader_pyramid.use();
+        shader_pyramid.setInt("texture_pyramid", 0);
+        texture_pyramid.activate(GL_TEXTURE0);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glBindVertexArray(VAOs[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 12);
+
+        //activate sand texture
+        ground_shader.use();
+        ground_shader.setInt("texture_sand", 0);
+        sand_texture.activate(GL_TEXTURE0);
+
+        glm::mat4 ground_model = glm::mat4(1.0f);
+        ground_model = glm::scale(ground_model, glm::vec3(100.0f, 1.0f, 100.0f));
+
+        ground_shader.use();
+        ground_shader.setMat4("model", ground_model);
+
+        glBindVertexArray(VAOs[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    shader.deleteProgram();
+    shader_pyramid.deleteProgram();
     glfwTerminate();
     return 0;
 }
@@ -134,5 +256,22 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
+    const float cameraSpeed = 5.0 * delta_time;
+
+    if(key == GLFW_KEY_W && action == GLFW_PRESS){
+        cameraPos += cameraFront * cameraSpeed;
+    }
+
+    if(key == GLFW_KEY_S && action == GLFW_PRESS){
+        cameraPos -= cameraFront * cameraSpeed;
+    }
+
+    if(key == GLFW_KEY_D && action == GLFW_PRESS){
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
+
+    if(key == GLFW_KEY_A && action == GLFW_PRESS){
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
 
 }
