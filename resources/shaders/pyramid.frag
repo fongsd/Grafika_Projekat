@@ -9,15 +9,16 @@ out vec4 fragColor;
 uniform sampler2D texture_pyramid;
 
 uniform vec3 lightColor;
-uniform vec3 lightPos;
+uniform vec3 lightPosition;
 uniform vec3 objectColor;
 void main()
 {
-    float ambientColor = 0.4;
+    float ambientStrength = 0.1;
+    vec3 ambientColor = ambientStrength * lightColor;
 
     vec3 norm = normalize(aNormal);
 
-    vec3 lightDir = normalize(lightPos - fragPos);
+    vec3 lightDir = normalize(lightPosition - fragPos);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 

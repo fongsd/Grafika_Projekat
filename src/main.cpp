@@ -21,20 +21,24 @@ const unsigned int SCR_WIDTH = 1980;
 const unsigned int SCR_HEIGHT = 1024;
 
 //Vectors of camera
+
+const glm::vec3 lightColor = glm::vec3(0.20f, 0.20f, 0.20f);
+
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
-
 //timing
 float delta_time = 0.0f;
-float last_frame = 0.0f;
 
+float last_frame = 0.0f;
 float lastX = SCR_WIDTH / 2.0;
+
 float lastY = SCR_HEIGHT / 2.0;
 bool firstMouse = true;
 float yaw = -90.0f;
 float pitch = 0.0f;
 float fov = 45.0f;
+// -------------------------------------------------------
 
 
 int main() {
@@ -65,7 +69,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -177,7 +181,7 @@ int main() {
     Shader kocka = Shader("resources/shaders/cube.vert", "resources/shaders/cube.frag");
     Shader obelisk = Shader("resources/shaders/obelisk.vert", "resources/shaders/obelisk.frag");
     kocka.use();
-    kocka.setVec3("lightColor", glm::vec3( 0, 0.8, 0.8));//boja kocke na vrhu obeliska
+    kocka.setVec3("lightColor", lightColor);//boja kocke na vrhu obeliska
 
 //    Shader nova_kocka = Shader("resources/shaders/kocka.vert", "resources/shaders/kocka.frag");
 //    nova_kocka.use();
@@ -257,6 +261,9 @@ int main() {
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
+        float radius = 3.0;
+        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) *radius  ,2.5,  sin(glfwGetTime())*radius);
+
         processInput(window);
 
         //frame-time logic
@@ -266,13 +273,13 @@ int main() {
 
         //Create model matrix
         glm::mat4 model = glm::mat4(1.0f);
-//        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
         //Create view matrix
         glm::mat4 view = glm::mat4(1.0f);
 
         //Create view matrix
-        view = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
+        view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
 
         //Create projection matrix
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
@@ -283,8 +290,8 @@ int main() {
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
-        shader_pyramid.setVec3("lightPosition", glm::vec3(-3.0f, 2.5f, -5.0f));        //pozicija svetla sa obeliska
-        shader_pyramid.setVec3("lightColor", glm::vec3(0.5f, 0.2f, 0.0f)); //jacina svetla sa obeliska
+        shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
+        shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
         shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
@@ -306,10 +313,10 @@ int main() {
         velika_piramida.setMat4("view", view);
         velika_piramida.setMat4("projection", projection);
 
-        velika_piramida.setVec3("lightPosition", glm::vec3(-3.0f, 2.5f, -5.0f));        //pozicija svetla sa obeliska
-        velika_piramida.setVec3("lightColor", glm::vec3(0.5f, 0.2f, 0.0f)); //jacina svetla sa obeliska
+        velika_piramida.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
+        velika_piramida.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
         velika_piramida.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
-        
+
         velika_piramida.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
@@ -329,6 +336,8 @@ int main() {
         ground_shader.setMat4("view", view);
         ground_shader.setMat4("projection", projection);
         //activate sand texture
+        ground_shader.setVec3("lightPosition", lightPosition);
+        ground_shader.setVec3("lightColor", lightColor);
         ground_shader.setInt("texture_sand", 0);
         sand_texture.activate(GL_TEXTURE0);
 
@@ -341,8 +350,8 @@ int main() {
 //        nova_kocka.use();
 
         glm::mat4 model_cube = glm::mat4(1.0f);
-        model_cube = glm::translate(model_cube, glm::vec3(-3.0f, 2.5f, -5.0f));
-        float cube_scale = 0.2f;
+        model_cube = glm::translate(model_cube, lightPosition);
+        float cube_scale = 0.08f;
 
         kocka.use();
 
@@ -418,7 +427,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
