@@ -22,7 +22,7 @@ const unsigned int SCR_HEIGHT = 1024;
 
 //Vectors of camera
 
-const glm::vec3 lightColor = glm::vec3(0.20f, 0.20f, 0.20f);
+const glm::vec3 lightColor = glm::vec3(0.5f, 0.5f, 0.0f);
 
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
@@ -69,7 +69,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -261,8 +261,8 @@ int main() {
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
-        float radius = 3.0;
-        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) *radius  ,2.5,  sin(glfwGetTime())*radius);
+        float radius = 10.0;
+        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
 
         processInput(window);
 
