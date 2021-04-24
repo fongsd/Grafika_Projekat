@@ -1,10 +1,12 @@
 #version 330 core
 
-out vec4 fragColor;
 in vec2 texCords;
-uniform sampler2D texture_pyramid;
-//uniform sampler2D t1;
 in vec3 aNormal;
+in vec3 fragPos;
+
+out vec4 fragColor;
+
+uniform sampler2D texture_pyramid;
 
 uniform vec3 lightColor;
 uniform vec3 lightPos;
@@ -15,7 +17,7 @@ void main()
 
     vec3 norm = normalize(aNormal);
 
-    vec3 lightDir = normalize(lightPos - norm);
+    vec3 lightDir = normalize(lightPos - fragPos);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
