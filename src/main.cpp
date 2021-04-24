@@ -82,21 +82,21 @@ int main() {
 //        0.5, 0.0, 0.5, 0.0, 1.0,//top-right 2
 //        0.5, 0.0, -0.5, 1.0, 1.0,//top-left 3
 
-        -0.5, 0.0, -0.5, 0.0, 0.0, //bottom-left 0
-        -0.5, 0.0, 0.5, 1.0, 0.0,//bottom-right 1
-        0.0, 0.6, 0.0, 0.5, 1.0,//peek 4
+        -0.5, 0.0, -0.5, 0.0, 0.0,  -1.25f, 1.25f, 0.0f,//bottom-left 0
+        -0.5, 0.0, 0.5, 1.0, 0.0, -1.25f, 1.25f, 0.0f,//bottom-right 1
+        0.0, 0.5, 0.0, 0.5, 1.0, -1.25f, 1.25f, 0.0f,//peek 4
 
-        -0.5, 0.0, 0.5, 0.0, 0.0,//bottom-right 1
-        0.5, 0.0, 0.5, 1.0, 0.0,//top-right 2
-        0.0, 0.6, 0.0, 0.5, 1.0,//peek 4
+        -0.5, 0.0, 0.5, 0.0, 0.0,   0.0f, 1.25f, 1.25f,//bottom-right 1
+        0.5, 0.0, 0.5, 1.0, 0.0,   0.0f, 1.25f, 1.25f,//top-right 2
+        0.0, 0.5, 0.0, 0.5, 1.0,  0.0f, 1.25f, 1.25f,//peek 4
 
-        0.5, 0.0, 0.5, 0.0, 0.0,//top-right 2
-        0.5, 0.0, -0.5, 1.0, 0.0,//top-left 3
-        0.0, 0.6, 0.0, 0.5, 1.0,//peek 4
+        0.5, 0.0, 0.5, 0.0, 0.0,  1.25f, 1.25f, 0.0f,//top-right 2
+        0.5, 0.0, -0.5, 1.0, 0.0, 1.25f, 1.25f, 0.0f,//top-left 3
+        0.0, 0.5, 0.0, 0.5, 1.0,  1.25f, 1.25f, 0.0f,//peek 4
 
-        0.5, 0.0, -0.5, 0.0, 0.0,//top-left 3
-        -0.5, 0.0, -0.5, 1.0, 0.0,//bottom-left 0
-        0.0, 0.6, 0.0, 0.5, 1.0//peek 4
+        0.5, 0.0, -0.5, 0.0, 0.0,  0.0f, 1.25f, -1.25f,//top-left 3
+        -0.5, 0.0, -0.5, 1.0, 0.0, 0.0f, 1.25f, -1.25f,//bottom-left 0
+        0.0, 0.5, 0.0, 0.5, 1.0, 0.0f, 1.25f, -1.25f//peek 4
 
     };
 
@@ -110,6 +110,79 @@ int main() {
             150.0f, 0.0f, -150.0f,  150.0f, 150.0f
 
     };
+
+    //pocetak kocke
+
+    float cube [] =
+            {
+                    -0.5f, -0.5f, -0.5f,
+                    0.5f, -0.5f, -0.5f,
+                    0.5f,  0.5f, -0.5f,
+                    0.5f,  0.5f, -0.5f,
+                    -0.5f,  0.5f, -0.5f,
+                    -0.5f, -0.5f, -0.5f,
+
+                    -0.5f, -0.5f,  0.5f,
+                    0.5f, -0.5f,  0.5f,
+                    0.5f,  0.5f,  0.5f,
+                    0.5f,  0.5f,  0.5f,
+                    -0.5f,  0.5f,  0.5f,
+                    -0.5f, -0.5f,  0.5f,
+
+                    -0.5f,  0.5f,  0.5f,
+                    -0.5f,  0.5f, -0.5f,
+                    -0.5f, -0.5f, -0.5f,
+                    -0.5f, -0.5f, -0.5f,
+                    -0.5f, -0.5f,  0.5f,
+                    -0.5f,  0.5f,  0.5f,
+
+                    0.5f,  0.5f,  0.5f,
+                    0.5f,  0.5f, -0.5f,
+                    0.5f, -0.5f, -0.5f,
+                    0.5f, -0.5f, -0.5f,
+                    0.5f, -0.5f,  0.5f,
+                    0.5f,  0.5f,  0.5f,
+
+                    -0.5f, -0.5f, -0.5f,
+                    0.5f, -0.5f, -0.5f,
+                    0.5f, -0.5f,  0.5f,
+                    0.5f, -0.5f,  0.5f,
+                    -0.5f, -0.5f,  0.5f,
+                    -0.5f, -0.5f, -0.5f,
+
+                    -0.5f,  0.5f, -0.5f,
+                    0.5f,  0.5f, -0.5f,
+                    0.5f,  0.5f,  0.5f,
+                    0.5f,  0.5f,  0.5f,
+                    -0.5f,  0.5f,  0.5f,
+                    -0.5f,  0.5f, -0.5f,
+            };
+
+    unsigned int cubeVBO, cubeVAO;
+
+    glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &cubeVBO);
+
+    glBindVertexArray(cubeVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float ), 0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
+
+    //dodavano odavde
+    Shader kocka = Shader("resources/shaders/cube.vert", "resources/shaders/cube.frag");
+    Shader obelisk = Shader("resources/shaders/obelisk.vert", "resources/shaders/obelisk.frag");
+    kocka.use();
+    kocka.setVec3("lightColor", glm::vec3( 0, 0.8, 0.8));//boja kocke na vrhu obeliska
+
+//    Shader nova_kocka = Shader("resources/shaders/kocka.vert", "resources/shaders/kocka.frag");
+//    nova_kocka.use();
+
+    //kraj kocke
 
     unsigned indices_pyramid[] = {
         0, 1, 2,
@@ -137,12 +210,14 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(pyramid), pyramid, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void * )(5* sizeof(float)));
+    glEnableVertexAttribArray(2);
     //sand
     glBindVertexArray(VAOs[1]);
 
@@ -174,13 +249,13 @@ int main() {
     texture_pyramid.free_data();
 
     //Initial color of background
-    glClearColor(0.2,0.4,0.7,1.0);
+    glClearColor(0.12,0.12,0.2,1.0);
 
     //Enabling depth testing
     glEnable(GL_DEPTH_TEST);
 
     //Rendering loop
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
         processInput(window);
 
@@ -191,7 +266,7 @@ int main() {
 
         //Create model matrix
         glm::mat4 model = glm::mat4(1.0f);
-
+//        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
         //Create view matrix
         glm::mat4 view = glm::mat4(1.0f);
@@ -208,6 +283,9 @@ int main() {
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
+        shader_pyramid.setVec3("lightPosition", glm::vec3(-3.0f, 2.5f, -5.0f));        //pozicija svetla sa obeliska
+        shader_pyramid.setVec3("lightColor", glm::vec3(0.5f, 0.2f, 0.0f)); //jacina svetla sa obeliska
+        shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
@@ -228,6 +306,10 @@ int main() {
         velika_piramida.setMat4("view", view);
         velika_piramida.setMat4("projection", projection);
 
+        velika_piramida.setVec3("lightPosition", glm::vec3(-3.0f, 2.5f, -5.0f));        //pozicija svetla sa obeliska
+        velika_piramida.setVec3("lightColor", glm::vec3(0.5f, 0.2f, 0.0f)); //jacina svetla sa obeliska
+        velika_piramida.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
+        
         velika_piramida.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
@@ -252,6 +334,37 @@ int main() {
 
         glBindVertexArray(VAOs[1]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+        glBindVertexArray(cubeVAO);
+
+//        nova_kocka.use();
+
+        glm::mat4 model_cube = glm::mat4(1.0f);
+        model_cube = glm::translate(model_cube, glm::vec3(-3.0f, 2.5f, -5.0f));
+        float cube_scale = 0.2f;
+
+        kocka.use();
+
+        model_cube = glm::scale(model_cube, glm::vec3(cube_scale));
+        kocka.setMat4("model", model_cube);
+        kocka.setMat4("view", view);
+        kocka.setMat4("projection", projection);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (int i = 0; i < 5; i++) {
+            obelisk.use();
+
+            glm::mat4 model_obelisk = glm::mat4(1.0f);
+            float angle = 0.50f;
+            model_obelisk = glm::translate(model_obelisk, glm::vec3(0.0f, angle * i, 0.0f));
+            model_obelisk = glm::translate(model_obelisk, glm::vec3(-3.0f, 0.2f, -5.0f));
+            model_obelisk = glm::scale(model_obelisk, glm::vec3(0.3f, 0.50f,  0.3f));
+            obelisk.setMat4("model", model_obelisk);
+            obelisk.setMat4("view", view);
+            obelisk.setMat4("projection", projection);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
