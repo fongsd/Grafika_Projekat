@@ -22,7 +22,7 @@ const unsigned int SCR_HEIGHT = 1024;
 
 //Vectors of camera
 
-const glm::vec3 lightColor = glm::vec3(0.5f, 0.5f, 0.0f);
+const glm::vec3 lightColor = glm::vec3(1.0f);
 
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
@@ -239,7 +239,7 @@ int main() {
     //Create shaders
     Shader shader_pyramid = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
     Shader ground_shader = Shader(FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
-    Shader velika_piramida = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
+
     //Pyramid texture
     Texture2D texture_pyramid = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
     texture_pyramid.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
@@ -262,7 +262,8 @@ int main() {
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
         float radius = 10.0;
-        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
+        //glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
+        glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  3.0);
 
         processInput(window);
 
@@ -295,8 +296,7 @@ int main() {
         shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
-
-
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBindVertexArray(VAOs[0]);
@@ -308,16 +308,17 @@ int main() {
         glm::mat4 model_velika = glm::mat4(1.0f);
         model_velika = glm::translate(model_velika, glm::vec3(5.0f, 0.0f, -5.0f));
         model_velika = glm::scale(model_velika, glm::vec3(4.0f, 4.0f, 4.0f));
-        velika_piramida.use();
-        velika_piramida.setMat4("model", model_velika);
-        velika_piramida.setMat4("view", view);
-        velika_piramida.setMat4("projection", projection);
+        shader_pyramid.use();
+        shader_pyramid.setMat4("model", model_velika);
+        shader_pyramid.setMat4("view", view);
+        shader_pyramid.setMat4("projection", projection);
 
-        velika_piramida.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
-        velika_piramida.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
-        velika_piramida.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
+        shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
+        shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
+        shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
+        shader_pyramid.setVec3("viewPos", cameraPos);
 
-        velika_piramida.setInt("texture_pyramid", 0);
+        shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
         glBindVertexArray(VAOs[0]);

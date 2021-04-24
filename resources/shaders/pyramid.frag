@@ -7,22 +7,32 @@ in vec3 fragPos;
 out vec4 fragColor;
 
 uniform sampler2D texture_pyramid;
+uniform vec3 viewPos;
 
 uniform vec3 lightColor;
 uniform vec3 lightPosition;
 uniform vec3 objectColor;
 void main()
 {
+    //ambient
     float ambientStrength = 0.1;
-    vec3 ambientColor = ambientStrength * lightColor;
+    vec3 ambient = ambientStrength * lightColor;
 
+    //light direction
+    vec3 lightDir = normalize(lightPosition - fragPos);
     vec3 norm = normalize(aNormal);
 
-    vec3 lightDir = normalize(lightPosition - fragPos);
+    //diffuse
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
+    //specular
+    float shinnes = 256;
+    vec3 reflectDir = reflect(-lightDir, norm);
+    vec3 viewDir = normalize(viewPos - fragPos);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shinnes);
+    float specularStrength = 0.5;
+    vec3 specular = specularStrength * lightColor * spec;
 
-    fragColor = vec4(diffuse + ambientColor, 1.0f)  * texture(texture_pyramid, texCords);
-    //fragColor = vec4(7.0, 4.0, 3.0, 1.0);
+    fragColor = vec4(diffuse + ambient + specular, 1.0f)  * texture(texture_pyramid, texCords) ;
 }
