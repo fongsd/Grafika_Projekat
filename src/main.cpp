@@ -282,7 +282,7 @@ int main() {
         view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
 
         //Create projection matrix
-        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 3000.0f);
 
         //Set matrices for pyramid
         shader_pyramid.use();
