@@ -120,47 +120,47 @@ int main() {
 
     float cube [] =
             {
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+                    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+                    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+                    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-                    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+                    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+                    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-                    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+                    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+                    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-                    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+                    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+                    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
             };
 
     unsigned int cubeVBO, cubeVAO;
@@ -173,11 +173,14 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float ), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float ), 0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
 
@@ -193,6 +196,9 @@ int main() {
     obelisk.setVec3("material.ambient", glm::vec3(0.2f));
     obelisk.setVec3("material.diffuse", glm::vec3(0.60f, 0.3f, 0.2f));
 //    obelisk.setVec3("lightPosition", lightPosition);
+
+    Shader sanduk = Shader("resources/shaders/sanduk.vert", "resources/shaders/sanduk.frag");
+    sanduk.use();
 
 //    Shader nova_kocka = Shader("resources/shaders/kocka.vert", "resources/shaders/kocka.frag");
 //    nova_kocka.use();
@@ -259,9 +265,15 @@ int main() {
 
     //Sand texture
     Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
-    texture_pyramid.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
-    texture_pyramid.reflect_vertically();
-    texture_pyramid.free_data();
+    sand_texture.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
+    sand_texture.reflect_vertically();
+    sand_texture.free_data();
+
+    //wood texture
+    Texture2D wood_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    wood_texture.load(FileSystem::getPath("resources/textures/container2.png"), GL_RGBA);
+    wood_texture.reflect_vertically();
+    wood_texture.free_data();
 
     //Initial color of background
     glClearColor(0.12,0.12,0.2,1.0);
@@ -360,7 +372,6 @@ int main() {
 
 
         glBindVertexArray(cubeVAO);
-
 //        nova_kocka.use();
 
         glm::mat4 model_cube = glm::mat4(1.0f);
@@ -376,6 +387,23 @@ int main() {
 
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+         cube_scale = 0.2;
+
+        sanduk.use();
+
+        model_cube = glm::mat4(1.0f);
+        model_cube = glm::translate(model_cube, glm::vec3(1.3, 0.12, -2.3));
+        model_cube = glm::scale(model_cube, glm::vec3(cube_scale));
+        sanduk.setMat4("model", model_cube);
+        sanduk.setMat4("view", view);
+        sanduk.setMat4("projection", projection);
+        sanduk.setInt("wood_texture", 0);
+        wood_texture.activate(GL_TEXTURE0);
+        glBindVertexArray(cubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
         for (int i = 0; i < 5; i++) {
             obelisk.setVec3("viewPos", lightPosition);
 
