@@ -23,6 +23,7 @@ const unsigned int SCR_HEIGHT = 1024;
 //Vectors of camera
 
 const glm::vec3 lightColor = glm::vec3(1.0f);
+glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  3.0);
 
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
@@ -69,7 +70,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -119,47 +120,47 @@ int main() {
 
     float cube [] =
             {
-                    -0.5f, -0.5f, -0.5f,
-                    0.5f, -0.5f, -0.5f,
-                    0.5f,  0.5f, -0.5f,
-                    0.5f,  0.5f, -0.5f,
-                    -0.5f,  0.5f, -0.5f,
-                    -0.5f, -0.5f, -0.5f,
+                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-                    -0.5f, -0.5f,  0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f,  0.5f,
-                    -0.5f, -0.5f,  0.5f,
+                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-                    -0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f, -0.5f,
-                    -0.5f, -0.5f, -0.5f,
-                    -0.5f, -0.5f, -0.5f,
-                    -0.5f, -0.5f,  0.5f,
-                    -0.5f,  0.5f,  0.5f,
+                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-                    0.5f,  0.5f,  0.5f,
-                    0.5f,  0.5f, -0.5f,
-                    0.5f, -0.5f, -0.5f,
-                    0.5f, -0.5f, -0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
+                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-                    -0.5f, -0.5f, -0.5f,
-                    0.5f, -0.5f, -0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    -0.5f, -0.5f,  0.5f,
-                    -0.5f, -0.5f, -0.5f,
+                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-                    -0.5f,  0.5f, -0.5f,
-                    0.5f,  0.5f, -0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f, -0.5f,
+                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
             };
 
     unsigned int cubeVBO, cubeVAO;
@@ -172,8 +173,11 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float ), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float ), 0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 
@@ -182,6 +186,13 @@ int main() {
     Shader obelisk = Shader("resources/shaders/obelisk.vert", "resources/shaders/obelisk.frag");
     kocka.use();
     kocka.setVec3("lightColor", lightColor);//boja kocke na vrhu obeliska
+
+    obelisk.use();
+    obelisk.setVec3("lightColor", lightColor);
+    obelisk.setVec3("objectColor", glm::vec3(0.76, 0.698, 0.52));
+    obelisk.setVec3("material.ambient", glm::vec3(0.2f));
+    obelisk.setVec3("material.diffuse", glm::vec3(0.60f, 0.3f, 0.2f));
+//    obelisk.setVec3("lightPosition", lightPosition);
 
 //    Shader nova_kocka = Shader("resources/shaders/kocka.vert", "resources/shaders/kocka.frag");
 //    nova_kocka.use();
@@ -262,8 +273,8 @@ int main() {
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
         float radius = 10.0;
-        //glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
-        glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  3.0);
+        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
+//        glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  3.0);
 
         processInput(window);
 
@@ -317,6 +328,8 @@ int main() {
         shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
         shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
         shader_pyramid.setVec3("viewPos", cameraPos);
+        shader_pyramid.setVec3("light.ambient",  0.6f, 0.6f, 0.6f);
+        shader_pyramid.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f);
 
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
@@ -361,8 +374,11 @@ int main() {
         kocka.setMat4("view", view);
         kocka.setMat4("projection", projection);
 
+
         glDrawArrays(GL_TRIANGLES, 0, 36);
         for (int i = 0; i < 5; i++) {
+            obelisk.setVec3("viewPos", lightPosition);
+
             obelisk.use();
 
             glm::mat4 model_obelisk = glm::mat4(1.0f);
@@ -370,6 +386,8 @@ int main() {
             model_obelisk = glm::translate(model_obelisk, glm::vec3(0.0f, angle * i, 0.0f));
             model_obelisk = glm::translate(model_obelisk, glm::vec3(-3.0f, 0.2f, -5.0f));
             model_obelisk = glm::scale(model_obelisk, glm::vec3(0.3f, 0.50f,  0.3f));
+
+
             obelisk.setMat4("model", model_obelisk);
             obelisk.setMat4("view", view);
             obelisk.setMat4("projection", projection);
