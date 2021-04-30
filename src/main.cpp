@@ -443,9 +443,9 @@ void processInput(GLFWwindow *window) {
 
     //da ne ide kamera ispod y ose
 
-    if (cameraPos.y  < 0)
+    if (cameraPos.y  < 0.3f)
     {
-        cameraPos.y +=cameraSpeed;
+        cameraPos.y = 0.3f;
     }
 
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
