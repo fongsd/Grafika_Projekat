@@ -23,7 +23,7 @@ const unsigned int SCR_HEIGHT = 1024;
 //Vectors of camera
 
 const glm::vec3 lightColor = glm::vec3(1.0f);
-glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  3.0);
+glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  -7.0);
 
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
@@ -275,6 +275,12 @@ int main() {
     wood_texture.reflect_vertically();
     wood_texture.free_data();
 
+
+    Texture2D metal_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    metal_texture.load(FileSystem::getPath("resources/textures/container2_specular.png"), GL_RGBA);
+    metal_texture.reflect_vertically();
+    metal_texture.free_data();
+
     //Initial color of background
     glClearColor(0.12,0.12,0.2,1.0);
 
@@ -398,8 +404,19 @@ int main() {
         sanduk.setMat4("model", model_cube);
         sanduk.setMat4("view", view);
         sanduk.setMat4("projection", projection);
-        sanduk.setInt("wood_texture", 0);
+        sanduk.setInt("material.diffuse", 0);
+        sanduk.setVec3("lightPosition", lightPosition);
+        sanduk.setVec3("lightColor", lightColor);
+        sanduk.setVec3("light.ambient",  0.6f, 0.6f, 0.6f);
+        sanduk.setVec3("light.diffuse",  glm::vec3(1.0f));
+        sanduk.setVec3("light.specular", 0.2, 0.2, 0.2);
+        sanduk.setVec3("viewPos", cameraPos);
+
         wood_texture.activate(GL_TEXTURE0);
+
+        sanduk.setInt("material.specular", 1);
+        metal_texture.activate(GL_TEXTURE1);
+
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
