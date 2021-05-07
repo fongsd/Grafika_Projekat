@@ -33,11 +33,11 @@ void main()
     vec3 norm = normalize(aNormal);
     //diffuse
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * light.diffuse;
+    vec3 diffuse = diff * lightColor;
     //sun direction
     vec3 sunLight = normalize(-sunLightDir);
     float diffSun = max(dot(norm, sunLight), 0.0);
-    vec3 diffuseSun = diffSun * sunLightColor;
+    vec3 diffuseSun = 1.4 * diffSun * sunLightColor;
 
     //specular
     float shinnes = 256;
@@ -47,5 +47,5 @@ void main()
     float specularStrength = 0.5;
     vec3 specular = specularStrength * lightColor * spec;
 
-    fragColor = vec4(vec3(1.0f), 1.0f)  * texture(texture_pyramid, texCords) ;
+    fragColor = vec4(diffuseSun + diffuse + specular + ambient, 1.0)  * texture(texture_pyramid, texCords) ;
 }

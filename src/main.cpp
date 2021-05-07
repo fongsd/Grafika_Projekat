@@ -22,12 +22,12 @@ const unsigned int SCR_HEIGHT = 1024;
 
 //Vectors of camera
 
-const glm::vec3 lightColor = glm::vec3(1.0f);
-glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  -7.0);
+const glm::vec3 lightColor = glm::vec3(0.2f, 0.4f, 0.4f);
+glm::vec3 lightPosition = glm::vec3(2.0 ,-0.1,  -7.0);
 
 //sunlight
-glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f,  0.0f);
-glm::vec3 sunLightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
+glm::vec3 sunLightColor = glm::vec3(1.0f);
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
@@ -199,7 +199,7 @@ int main() {
     obelisk.setVec3("objectColor", glm::vec3(0.76, 0.698, 0.52));
     obelisk.setVec3("material.ambient", glm::vec3(0.2f));
     obelisk.setVec3("material.diffuse", glm::vec3(0.60f, 0.3f, 0.2f));
-//    obelisk.setVec3("lightPosition", lightPosition);
+    obelisk.setVec3("lightPosition", lightPosition);
 
     Shader sanduk = Shader("resources/shaders/sanduk.vert", "resources/shaders/sanduk.frag");
     sanduk.use();
@@ -324,7 +324,7 @@ int main() {
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
-        shader_pyramid.setVec3("light.direction", sunLightDirection);
+        shader_pyramid.setVec3("sunLightDir", sunLightDirection);
         shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
         shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
         shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
