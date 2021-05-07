@@ -7,6 +7,15 @@ uniform vec3 lightColor;
 uniform vec3 lightPosition;
 //uniform sampler2D t1;
 
+struct Light
+{
+    vec3 direction;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+uniform Light light;
+uniform vec3 sunLightColor;
 in vec3 fragPos;
 void main()
 {
@@ -15,8 +24,14 @@ void main()
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
+    //sun light
+    vec3 sunLight = normalize(-light.direction);
+    float diffSun = max(dot(norm, sunLight), 0.0);
+    vec3 diffuseSun = diff * sunLightColor;
+
+
     float ambientStrength = 0.1;
     vec3 ambient = lightColor * ambientStrength;
 
-    fragColor = vec4(diffuse + ambient , 1.0f)  * texture(texture_sand, texCords);
+    fragColor = vec4(diffuseSun + diffuse + ambient , 1.0f)  * texture(texture_sand, texCords);
 }

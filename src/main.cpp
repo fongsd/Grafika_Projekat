@@ -25,6 +25,10 @@ const unsigned int SCR_HEIGHT = 1024;
 const glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  -7.0);
 
+//sunlight
+glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
+glm::vec3 sunLightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+//camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
@@ -320,6 +324,7 @@ int main() {
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
+        shader_pyramid.setVec3("light.direction", sunLightDirection);
         shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
         shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
         shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
@@ -368,6 +373,10 @@ int main() {
         ground_shader.setMat4("view", view);
         ground_shader.setMat4("projection", projection);
         //activate sand texture
+        ground_shader.setVec3("light.direction", sunLightDirection);
+        ground_shader.setVec3("sunLightColor", sunLightColor);
+
+
         ground_shader.setVec3("lightPosition", lightPosition);
         ground_shader.setVec3("lightColor", lightColor);
         ground_shader.setInt("texture_sand", 0);
