@@ -15,13 +15,13 @@ uniform vec3 objectColor;
 
 struct Light
 {
-    vec3 direction;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
 };
+uniform vec3 sunLightDir;
 uniform Light light;
-
+uniform vec3 sunLightColor;
 void main()
 {
     //ambient
@@ -31,13 +31,13 @@ void main()
     //light direction
     vec3 lightDir = normalize(lightPosition - fragPos);
     vec3 norm = normalize(aNormal);
-    vec3 sunLight = normalize(-light.direction);
     //diffuse
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * light.diffuse;
     //sun direction
+    vec3 sunLight = normalize(-sunLightDir);
     float diffSun = max(dot(norm, sunLight), 0.0);
-    vec3 diffuseSun = diffSun * light.diffuse;
+    vec3 diffuseSun = diffSun * sunLightColor;
 
     //specular
     float shinnes = 256;
@@ -47,5 +47,5 @@ void main()
     float specularStrength = 0.5;
     vec3 specular = specularStrength * lightColor * spec;
 
-    fragColor = vec4(diffuseSun + diffuse + ambient + specular, 1.0f)  * texture(texture_pyramid, texCords) ;
+    fragColor = vec4(vec3(1.0f), 1.0f)  * texture(texture_pyramid, texCords) ;
 }

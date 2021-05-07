@@ -17,6 +17,7 @@ struct Light
 uniform Light light;
 uniform vec3 sunLightColor;
 in vec3 fragPos;
+uniform vec3 sunLightDir;
 void main()
 {
     vec3 norm = vec3(0, 1, 0);
@@ -25,9 +26,9 @@ void main()
     vec3 diffuse = diff * lightColor;
 
     //sun light
-    vec3 sunLight = normalize(-light.direction);
+    vec3 sunLight = normalize(-sunLightDir);
     float diffSun = max(dot(norm, sunLight), 0.0);
-    vec3 diffuseSun = diff * sunLightColor;
+    vec3 diffuseSun = diffSun * sunLightColor;
 
 
     float ambientStrength = 0.1;

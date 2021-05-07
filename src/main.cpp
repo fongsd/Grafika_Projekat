@@ -26,7 +26,7 @@ const glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  -7.0);
 
 //sunlight
-glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
+glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f,  0.0f);
 glm::vec3 sunLightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
@@ -352,15 +352,14 @@ int main() {
         shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
         shader_pyramid.setVec3("viewPos", cameraPos);
         shader_pyramid.setVec3("light.ambient",  0.6f, 0.6f, 0.6f);
-        shader_pyramid.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f);
-
+        shader_pyramid.setVec3("sunLightColor",  sunLightColor);
+        shader_pyramid.setVec3("sunLightDir", sunLightDirection);
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
         //set matrices for ground
-        ground_shader.use();
         shader_pyramid.setMat4("model", model);
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
@@ -369,11 +368,12 @@ int main() {
         glm::mat4 ground_model = glm::mat4(1.0f);
 //        ground_model = glm::scale(ground_model, glm::vec3(10.0f, 1.0f, 10.0f));
 
+        ground_shader.use();
         ground_shader.setMat4("model", ground_model);
         ground_shader.setMat4("view", view);
         ground_shader.setMat4("projection", projection);
         //activate sand texture
-        ground_shader.setVec3("light.direction", sunLightDirection);
+        ground_shader.setVec3("sunLightDir", sunLightDirection);
         ground_shader.setVec3("sunLightColor", sunLightColor);
 
 
