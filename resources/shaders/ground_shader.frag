@@ -14,6 +14,7 @@ struct Light
     vec3 diffuse;
     vec3 specular;
 };
+
 uniform Light light;
 uniform vec3 sunLightColor;
 in vec3 fragPos;

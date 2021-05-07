@@ -20,18 +20,24 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 const unsigned int SCR_WIDTH = 1980;
 const unsigned int SCR_HEIGHT = 1024;
 
-//Vectors of camera
+//TODO: implementirati sun light za kutiju
 
+//Vectors of camera
 const glm::vec3 lightColor = glm::vec3(0.2f, 0.4f, 0.4f);
 glm::vec3 lightPosition = glm::vec3(2.0 ,-0.1,  -7.0);
 
 //sunlight
 glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
-glm::vec3 sunLightColor = glm::vec3(1.0f);
+glm::vec3 sunLightColor = glm::vec3(0.3f);
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
+
+float lightConst = 1.0f;
+float linearConst = 0.9;
+float quadraticConst = 1.8f;
+
 //timing
 float delta_time = 0.0f;
 
@@ -323,6 +329,10 @@ int main() {
         shader_pyramid.setMat4("model", model);
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
+
+        shader_pyramid.setFloat("lightConst", lightConst);
+        shader_pyramid.setFloat("lightConst", linearConst);
+        shader_pyramid.setFloat("lightConst", quadraticConst);
 
         shader_pyramid.setVec3("sunLightDir", sunLightDirection);
         shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
