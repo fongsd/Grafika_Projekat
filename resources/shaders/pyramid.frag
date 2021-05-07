@@ -17,13 +17,23 @@ uniform float lightConst;
 uniform float linearConst;
 uniform float quadraticConst;
 
+struct FlashLight{
+    int spotlightFlag;
+    vec3 position;
+    vec3 direction;
+    float cutOff;
+    float outterCutOff;
+};
+
 struct Light
 {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
 };
+
 uniform vec3 sunLightDir;
+uniform FlashLight flashLight;
 uniform Light light;
 uniform vec3 sunLightColor;
 void main()
@@ -55,5 +65,17 @@ void main()
     float distance = length(lightPosition - fragPos);
     float attenuation = 1.0 / (lightConst + linearConst * distance + quadraticConst * (distance*distance));
 
-    fragColor = vec4(diffuseSun + attenuation * (diffuse + specular) + ambient, 1.0)  * texture(texture_pyramid, texCords) ;
+//    //spotlight
+//    float thetaAngle = dot(normalize(flashLight.position - fragPos), normalize(flashLight.direction));
+//    if(thetaAngle < flashLight.cutOff && flashLight.spotlightFlag == 1){
+//        fragColor = vec4(diffuseSun + attenuation * (diffuse + specular) + ambient, 1.0)  * texture(texture_pyramid, texCords);
+//    }
+//    else
+//    {
+//        //calculations
+//        float epsilon = flashLight.cutOff - flashLight.outterCutOff;
+//        float intensity = clamp((thetaAngle - flashLight.outterCutOff)/epsilon, 0.0, 1.0);
+      fragColor = vec4(diffuseSun +  attenuation * (diffuse + specular) + ambient, 1.0)  * texture(texture_pyramid, texCords) ;
+//    }
+
 }

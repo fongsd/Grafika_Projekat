@@ -35,8 +35,11 @@ glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
 
 float lightConst = 1.0f;
-float linearConst = 0.9;
-float quadraticConst = 1.8f;
+float linearConst = 0.09;
+float quadraticConst = 0.032f;
+
+//spotlight
+int spotlightFlag = 1;
 
 //timing
 float delta_time = 0.0f;
@@ -331,8 +334,14 @@ int main() {
         shader_pyramid.setMat4("projection", projection);
 
         shader_pyramid.setFloat("lightConst", lightConst);
-        shader_pyramid.setFloat("lightConst", linearConst);
-        shader_pyramid.setFloat("lightConst", quadraticConst);
+        shader_pyramid.setFloat("linearConst", linearConst);
+        shader_pyramid.setFloat("quadraticConst", quadraticConst);
+
+//        shader_pyramid.setInt("flashLight.spotlightFlag", spotlightFlag);
+//        shader_pyramid.setVec3("flashLight.position", cameraPos);
+//        shader_pyramid.setVec3("flashLight.direction", cameraFront);
+//        shader_pyramid.setFloat("flashLight.cutOff", glm::cos(glm::radians(25.0f)));
+//        shader_pyramid.setFloat("flashLight.outterCutOff", 35.0f);
 
         shader_pyramid.setVec3("sunLightDir", sunLightDirection);
         shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
