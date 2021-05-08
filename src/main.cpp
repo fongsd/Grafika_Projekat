@@ -28,18 +28,20 @@ glm::vec3 lightPosition = glm::vec3(2.0 ,-0.1,  -7.0);
 
 //sunlight
 glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
-glm::vec3 sunLightColor = glm::vec3(0.3f);
+glm::vec3 sunLightColor = glm::vec3(0.2f);
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
 
+//light distance constants
 float lightConst = 1.0f;
-float linearConst = 0.09;
+float linearConst = 0.08;
 float quadraticConst = 0.032f;
 
-//spotlight
-int spotlightFlag = 1;
+//flashlight
+glm::vec3 flashlightColor = glm::vec3(1.0f);
+int flaslightFlag = 1;
 
 //timing
 float delta_time = 0.0f;
@@ -83,7 +85,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -213,11 +215,6 @@ int main() {
     Shader sanduk = Shader("resources/shaders/sanduk.vert", "resources/shaders/sanduk.frag");
     sanduk.use();
 
-//    Shader nova_kocka = Shader("resources/shaders/kocka.vert", "resources/shaders/kocka.frag");
-//    nova_kocka.use();
-
-    //kraj kocke
-
     unsigned indices_pyramid[] = {
         0, 1, 2,
         0, 2, 3,
@@ -337,16 +334,16 @@ int main() {
         shader_pyramid.setFloat("linearConst", linearConst);
         shader_pyramid.setFloat("quadraticConst", quadraticConst);
 
-//        shader_pyramid.setInt("flashLight.spotlightFlag", spotlightFlag);
-//        shader_pyramid.setVec3("flashLight.position", cameraPos);
-//        shader_pyramid.setVec3("flashLight.direction", cameraFront);
-//        shader_pyramid.setFloat("flashLight.cutOff", glm::cos(glm::radians(25.0f)));
-//        shader_pyramid.setFloat("flashLight.outterCutOff", 35.0f);
+        shader_pyramid.setInt("flashLight.flaslightFlag", flaslightFlag);
+        shader_pyramid.setVec3("flashLight.position", cameraPos);
+        shader_pyramid.setVec3("flashLight.direction", cameraFront);
+        shader_pyramid.setVec3("flashLight.color", glm::vec3 (1.0f));
+        shader_pyramid.setFloat("flashLight.cutOff", glm::cos(glm::radians(10.0f)));
+        shader_pyramid.setFloat("flashLight.outterCutOff", glm::cos(glm::radians(15.0f)));
 
         shader_pyramid.setVec3("sunLightDir", sunLightDirection);
-        shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
-        shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
-        shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
+        shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla svica
+        shader_pyramid.setVec3("lightColor", lightColor);
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
         
@@ -370,7 +367,7 @@ int main() {
         shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
         shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
         shader_pyramid.setVec3("viewPos", cameraPos);
-        shader_pyramid.setVec3("light.ambient",  0.6f, 0.6f, 0.6f);
+        shader_pyramid.setVec3("light.ambient",  lightColor);
         shader_pyramid.setVec3("sunLightColor",  sunLightColor);
         shader_pyramid.setVec3("sunLightDir", sunLightDirection);
         shader_pyramid.setInt("texture_pyramid", 0);
@@ -378,14 +375,13 @@ int main() {
 
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
-        //set matrices for ground
+
         shader_pyramid.setMat4("model", model);
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
-
+        //ground
         glm::mat4 ground_model = glm::mat4(1.0f);
-//        ground_model = glm::scale(ground_model, glm::vec3(10.0f, 1.0f, 10.0f));
 
         ground_shader.use();
         ground_shader.setMat4("model", ground_model);

@@ -11,16 +11,16 @@ uniform vec3 viewPos;
 
 uniform vec3 lightColor;
 uniform vec3 lightPosition;
-uniform vec3 objectColor;
 
 uniform float lightConst;
 uniform float linearConst;
 uniform float quadraticConst;
 
 struct FlashLight{
-    int spotlightFlag;
+    int flashlightFlag;
     vec3 position;
     vec3 direction;
+    vec3 color;
     float cutOff;
     float outterCutOff;
 };
@@ -45,9 +45,11 @@ void main()
     //light direction
     vec3 lightDir = normalize(lightPosition - fragPos);
     vec3 norm = normalize(aNormal);
+
     //diffuse
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
+
     //sun direction
     vec3 sunLight = normalize(-sunLightDir);
     float diffSun = max(dot(norm, sunLight), 0.0);
@@ -65,17 +67,20 @@ void main()
     float distance = length(lightPosition - fragPos);
     float attenuation = 1.0 / (lightConst + linearConst * distance + quadraticConst * (distance*distance));
 
-//    //spotlight
-//    float thetaAngle = dot(normalize(flashLight.position - fragPos), normalize(flashLight.direction));
-//    if(thetaAngle < flashLight.cutOff && flashLight.spotlightFlag == 1){
-//        fragColor = vec4(diffuseSun + attenuation * (diffuse + specular) + ambient, 1.0)  * texture(texture_pyramid, texCords);
-//    }
-//    else
-//    {
-//        //calculations
-//        float epsilon = flashLight.cutOff - flashLight.outterCutOff;
-//        float intensity = clamp((thetaAngle - flashLight.outterCutOff)/epsilon, 0.0, 1.0);
-      fragColor = vec4(diffuseSun +  attenuation * (diffuse + specular) + ambient, 1.0)  * texture(texture_pyramid, texCords) ;
-//    }
+    //flashlight
+    float cosTheta = dot(normalize(fragPos - flashLight.position), normalize(flashLight.direction));
+    float epsilon = flashLight.cutOff - flashLight.outterCutOff;
+    float intensity = clamp((cosTheta - flashLight.outterCutOff)/epsilon, 0.0, 1.0);
+    float flashDistance = length(flashLight.position - fragPos);
+    float flashAttenuation = 1.0 / (lightConst + linearConst * flashDistance + quadraticConst * (flashDistance*flashDistance));
+    vec3 flash = flashLight.color * flashAttenuation * intensity;
+
+    if(cosTheta > flashLight.outterCutOff){
+        fragColor = vec4(flash + diffuseSun + attenuation * (diffuse + specular) + ambient, 1.0)  * texture(texture_pyramid, texCords);
+    }
+    else
+    {
+        fragColor = vec4(diffuseSun + attenuation * (diffuse + specular) + ambient, 1.0)  * texture(texture_pyramid, texCords) ;
+    }
 
 }
