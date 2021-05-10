@@ -23,12 +23,13 @@ const unsigned int SCR_HEIGHT = 1024;
 //TODO: implementirati sun light za kutiju
 
 //Vectors of camera
-const glm::vec3 lightColor = glm::vec3(0.2f, 0.4f, 0.4f);
+glm::vec3 lightColor = glm::vec3(0.2f, 0.4f, 0.4f);
 glm::vec3 lightPosition = glm::vec3(2.0 ,-0.1,  -7.0);
 
 //sunlight
 glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
-glm::vec3 sunLightColor = glm::vec3(0.2f);
+glm::vec3 sunLightColor = glm::vec3(0.8f);
+
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
@@ -39,9 +40,9 @@ float lightConst = 1.0f;
 float linearConst = 0.08;
 float quadraticConst = 0.032f;
 
-//flashlight
-glm::vec3 flashlightColor = glm::vec3(1.0f);
-int flaslightFlag = 1;
+//spotlight
+glm::vec3 spotlightColor = glm::vec3(1.0f);
+int spotLightFlag = 1;
 
 //timing
 float delta_time = 0.0f;
@@ -300,7 +301,7 @@ int main() {
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
-        float radius = 10.0;
+        float radius = 8.0;
         glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
 //        glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  3.0);
 
@@ -330,20 +331,29 @@ int main() {
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
-        shader_pyramid.setFloat("lightConst", lightConst);
-        shader_pyramid.setFloat("linearConst", linearConst);
-        shader_pyramid.setFloat("quadraticConst", quadraticConst);
+        //spotLight specification
+        shader_pyramid.setFloat("spotLight.lightConst", lightConst);
+        shader_pyramid.setFloat("spotLight.linearConst", linearConst);
+        shader_pyramid.setFloat("spotLight.quadraticConst", quadraticConst);
+        shader_pyramid.setInt("spotLight.spotLightFlag", spotLightFlag);
+        shader_pyramid.setVec3("spotLight.position", cameraPos);
+        shader_pyramid.setVec3("spotLight.direction", cameraFront);
+        shader_pyramid.setVec3("spotLight.color", glm::vec3 (1.0f));
+        shader_pyramid.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+        shader_pyramid.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
 
-        shader_pyramid.setInt("flashLight.flaslightFlag", flaslightFlag);
-        shader_pyramid.setVec3("flashLight.position", cameraPos);
-        shader_pyramid.setVec3("flashLight.direction", cameraFront);
-        shader_pyramid.setVec3("flashLight.color", glm::vec3 (1.0f));
-        shader_pyramid.setFloat("flashLight.cutOff", glm::cos(glm::radians(10.0f)));
-        shader_pyramid.setFloat("flashLight.outterCutOff", glm::cos(glm::radians(15.0f)));
+        //sunLight specification
+        shader_pyramid.setVec3("dirLight.direction", sunLightDirection);
+        shader_pyramid.setVec3("dirLight.color", sunLightColor);
 
-        shader_pyramid.setVec3("sunLightDir", sunLightDirection);
-        shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla svica
-        shader_pyramid.setVec3("lightColor", lightColor);
+        //bug1 specification
+        shader_pyramid.setFloat("pointLight.lightConst", lightConst);
+        shader_pyramid.setFloat("pointLight.linearConst", linearConst);
+        shader_pyramid.setFloat("pointLight.quadraticConst", quadraticConst);
+        shader_pyramid.setVec3("pointLight.position", lightPosition);
+        shader_pyramid.setVec3("pointLight.color", lightColor);
+
+        //pyramid texture
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
         
@@ -352,25 +362,16 @@ int main() {
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
 
-        //odavde
         glBindVertexArray(0);
 
         glm::mat4 model_velika = glm::mat4(1.0f);
         model_velika = glm::translate(model_velika, glm::vec3(5.0f, 0.0f, -5.0f));
         model_velika = glm::scale(model_velika, glm::vec3(4.0f, 4.0f, 4.0f));
-        shader_pyramid.use();
+
         shader_pyramid.setMat4("model", model_velika);
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
 
-        shader_pyramid.setVec3("lightPosition", lightPosition);        //pozicija svetla sa obeliska
-        shader_pyramid.setVec3("lightColor", lightColor); //jacina svetla sa obeliska
-        shader_pyramid.setVec3("objectColor", glm::vec3(0.2f, 0.3f, 0.4f)); //boja piramide
-        shader_pyramid.setVec3("viewPos", cameraPos);
-        shader_pyramid.setVec3("light.ambient",  lightColor);
-        shader_pyramid.setVec3("sunLightColor",  sunLightColor);
-        shader_pyramid.setVec3("sunLightDir", sunLightDirection);
-        shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
 
         glBindVertexArray(VAOs[0]);
@@ -537,7 +538,12 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 //        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 //    }
     if(key == GLFW_KEY_F && action == GLFW_PRESS){
-        //TODO: Uraditi fullscreen dugme
+        if(spotLightFlag == 1){
+            spotLightFlag = 0;
+        }
+        else{
+            spotLightFlag = 1;
+        }
     }
 
 }
