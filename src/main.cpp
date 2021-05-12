@@ -5,11 +5,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
 #include <learnopengl/filesystem.h>
-#include <rg/Shader.h>
+#include <learnopengl/shader_m.h>
+#include <learnopengl/camera.h>
+#include <learnopengl/model.h>
+#include <stb_image.h>
 #include <rg/Texture2D.h>
-
+#include <rg/Shader.h>
+#include <iostream>
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -86,7 +89,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -201,8 +204,8 @@ int main() {
     glBindVertexArray(0);
 
     //dodavano odavde
-    Shader kocka = Shader("resources/shaders/cube.vert", "resources/shaders/cube.frag");
-    Shader obelisk = Shader("resources/shaders/obelisk.vert", "resources/shaders/obelisk.frag");
+    Shader kocka = Shader(FileSystem::getPath("resources/shaders/cube.vert"), FileSystem::getPath("resources/shaders/cube.frag"));
+    Shader obelisk = Shader(FileSystem::getPath("resources/shaders/obelisk.vert"), FileSystem::getPath("resources/shaders/obelisk.frag"));
     kocka.use();
     kocka.setVec3("lightColor", lightColor);//boja kocke na vrhu obeliska
 
@@ -213,9 +216,9 @@ int main() {
     obelisk.setVec3("material.diffuse", glm::vec3(0.60f, 0.3f, 0.2f));
     obelisk.setVec3("lightPosition", lightPosition);
 
-    Shader sanduk = Shader("resources/shaders/sanduk.vert", "resources/shaders/sanduk.frag");
+    Shader sanduk = Shader(FileSystem::getPath("resources/shaders/sanduk.vert"), FileSystem::getPath("resources/shaders/sanduk.frag"));
     sanduk.use();
-
+//
     unsigned indices_pyramid[] = {
         0, 1, 2,
         0, 2, 3,
@@ -266,27 +269,27 @@ int main() {
 
     //Create shaders
     Shader shader_pyramid = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
-    Shader ground_shader = Shader(FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
+    Shader ground_shader = Shader (FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
 
-    //Pyramid texture
+//    Pyramid texture
     Texture2D texture_pyramid = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
     texture_pyramid.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
     texture_pyramid.reflect_vertically();
     texture_pyramid.free_data();
-
-    //Sand texture
+//
+//    Sand texture
     Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
     sand_texture.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
     sand_texture.reflect_vertically();
     sand_texture.free_data();
-
-    //wood texture
+//
+//    wood texture
     Texture2D wood_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
     wood_texture.load(FileSystem::getPath("resources/textures/container2.png"), GL_RGBA);
     wood_texture.reflect_vertically();
     wood_texture.free_data();
-
-
+//
+//
     Texture2D metal_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
     metal_texture.load(FileSystem::getPath("resources/textures/container2_specular.png"), GL_RGBA);
     metal_texture.reflect_vertically();
@@ -296,7 +299,16 @@ int main() {
     glClearColor(0.12,0.12,0.2,1.0);
 
     //Enabling depth testing
+    stbi_set_flip_vertically_on_load(true);
     glEnable(GL_DEPTH_TEST);
+
+    shader modelShader("resources/shaders/model_loading.vs",
+                       "resources/shaders/model_loading.fs");
+
+//    modelShader.use();
+
+    Model ourModel(FileSystem::getPath("resources/objects/truck/13630_open3dmodel/open3dmodel.com/Model_C0901061/kraz.obj"));
+
 
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -323,15 +335,16 @@ int main() {
         view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
 
         //Create projection matrix
-        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 3000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
 
-        //Set matrices for pyramid
+//        //Set matrices for pyramid
         shader_pyramid.use();
         shader_pyramid.setMat4("model", model);
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
-
-        //spotLight specification
+//
+//
+//        //spotLight specification
         shader_pyramid.setFloat("spotLight.lightConst", lightConst);
         shader_pyramid.setFloat("spotLight.linearConst", linearConst);
         shader_pyramid.setFloat("spotLight.quadraticConst", quadraticConst);
@@ -342,23 +355,23 @@ int main() {
         shader_pyramid.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
         shader_pyramid.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
 
-        //sunLight specification
+//        //sunLight specification
         shader_pyramid.setVec3("dirLight.direction", sunLightDirection);
         shader_pyramid.setVec3("dirLight.color", sunLightColor);
-
-        //bug1 specification
+//
+//        //bug1 specification
         shader_pyramid.setFloat("pointLight.lightConst", lightConst);
         shader_pyramid.setFloat("pointLight.linearConst", linearConst);
         shader_pyramid.setFloat("pointLight.quadraticConst", quadraticConst);
         shader_pyramid.setVec3("pointLight.position", lightPosition);
         shader_pyramid.setVec3("pointLight.color", lightColor);
 
-        //pyramid texture
+//        //pyramid texture
         shader_pyramid.setInt("texture_pyramid", 0);
         texture_pyramid.activate(GL_TEXTURE0);
-        
+//
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+//
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
 
@@ -404,7 +417,7 @@ int main() {
 
         glBindVertexArray(cubeVAO);
 //        nova_kocka.use();
-
+//
         glm::mat4 model_cube = glm::mat4(1.0f);
         model_cube = glm::translate(model_cube, lightPosition);
         float cube_scale = 0.08f;
@@ -419,7 +432,7 @@ int main() {
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-         cube_scale = 0.2;
+        cube_scale = 0.2;
 
         sanduk.use();
 
@@ -463,12 +476,26 @@ int main() {
             obelisk.setMat4("projection", projection);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+//
+        modelShader.use();
+        glm::mat4 model_model = glm::mat4(1.0f);
+        model_model = glm::translate(model_model, glm::vec3(-2.0f, 0.3f , 0.0f));
+        model_model = glm::rotate(model_model, (float)glm::radians(-90.0f), glm::vec3(1, 0, 0));
+        model_model = glm::scale(model_model, glm::vec3(0.0001));
+        modelShader.setMat4("model", model_model);
+        modelShader.setMat4("view", view);
+        modelShader.setMat4("projection", projection);
+        modelShader.setVec3("lightPosition", lightPosition);
+        modelShader.setVec3("sunLightColor", sunLightColor);
+        modelShader.setVec3("sunLightDirection", sunLightDirection);
+
+        ourModel.Draw(modelShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    shader_pyramid.deleteProgram();
+
     glfwTerminate();
     return 0;
 }
