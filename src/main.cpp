@@ -3,16 +3,15 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <learnopengl/filesystem.h>
 #include <learnopengl/shader_m.h>
-#include <learnopengl/camera.h>
 #include <learnopengl/model.h>
 #include <stb_image.h>
 #include <rg/Texture2D.h>
 #include <rg/Shader.h>
 #include <iostream>
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -276,20 +275,20 @@ int main() {
     texture_pyramid.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
     texture_pyramid.reflect_vertically();
     texture_pyramid.free_data();
-//
+
 //    Sand texture
     Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
     sand_texture.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
     sand_texture.reflect_vertically();
     sand_texture.free_data();
-//
+
 //    wood texture
     Texture2D wood_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
     wood_texture.load(FileSystem::getPath("resources/textures/container2.png"), GL_RGBA);
     wood_texture.reflect_vertically();
     wood_texture.free_data();
-//
-//
+
+    // metal texture
     Texture2D metal_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
     metal_texture.load(FileSystem::getPath("resources/textures/container2_specular.png"), GL_RGBA);
     metal_texture.reflect_vertically();
@@ -315,7 +314,8 @@ int main() {
     while(!glfwWindowShouldClose(window)){
         float radius = 8.0;
         glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
-//        glm::vec3 lightPosition = glm::vec3(2.0 ,2.5,  3.0);
+        sunLightColor = glm::vec3(glm::cos(glfwGetTime()/10.0) / 2.0 + 0.5);
+        //sunLightDirection = glm::vec3(-max(glm::cos(glfwGetTime()/5.0), 0.0), -max(glm::sin(glfwGetTime()/5.0), 0.0), 0.0);
 
         processInput(window);
 
@@ -342,9 +342,11 @@ int main() {
         shader_pyramid.setMat4("model", model);
         shader_pyramid.setMat4("view", view);
         shader_pyramid.setMat4("projection", projection);
-//
-//
-//        //spotLight specification
+
+        //viewPos
+        shader_pyramid.setVec3("viewPos", cameraPos);
+
+        //spotLight specification
         shader_pyramid.setFloat("spotLight.lightConst", lightConst);
         shader_pyramid.setFloat("spotLight.linearConst", linearConst);
         shader_pyramid.setFloat("spotLight.quadraticConst", quadraticConst);
@@ -401,15 +403,37 @@ int main() {
         ground_shader.setMat4("model", ground_model);
         ground_shader.setMat4("view", view);
         ground_shader.setMat4("projection", projection);
-        //activate sand texture
-        ground_shader.setVec3("sunLightDir", sunLightDirection);
-        ground_shader.setVec3("sunLightColor", sunLightColor);
 
 
-        ground_shader.setVec3("lightPosition", lightPosition);
-        ground_shader.setVec3("lightColor", lightColor);
+        //viewPos
+        ground_shader.setVec3("viewPos", cameraPos);
+
+        //sun light (directional light)
+        ground_shader.setVec3("dirLight.direction", sunLightDirection);
+        ground_shader.setVec3("dirLight.color", sunLightColor);
+
+        //bug light (point light)
+        ground_shader.setFloat("pointLight.lightConst", lightConst);
+        ground_shader.setFloat("pointLight.linearConst", linearConst);
+        ground_shader.setFloat("pointLight.quadraticConst", quadraticConst);
+        ground_shader.setVec3("pointLight.position", lightPosition);
+        ground_shader.setVec3("pointLight.color", lightColor);
+
+        //spotlight
+        ground_shader.setFloat("spotLight.lightConst", lightConst);
+        ground_shader.setFloat("spotLight.linearConst", linearConst);
+        ground_shader.setFloat("spotLight.quadraticConst", quadraticConst);
+        ground_shader.setInt("spotLight.spotLightFlag", spotLightFlag);
+        ground_shader.setVec3("spotLight.position", cameraPos);
+        ground_shader.setVec3("spotLight.direction", cameraFront);
+        ground_shader.setVec3("spotLight.color", glm::vec3 (1.0f));
+        ground_shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+        ground_shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+
+        // texture activation
         ground_shader.setInt("texture_sand", 0);
         sand_texture.activate(GL_TEXTURE0);
+
 
         glBindVertexArray(VAOs[1]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
