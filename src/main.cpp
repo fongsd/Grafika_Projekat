@@ -295,7 +295,6 @@ int main() {
     metal_texture.free_data();
 
     //Initial color of background
-    glClearColor(0.12,0.12,0.2,1.0);
 
     //Enabling depth testing
     stbi_set_flip_vertically_on_load(true);
@@ -312,6 +311,9 @@ int main() {
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
+
+
+        glClearColor(glm::cos(glfwGetTime()/10)/2 + 0.3,glm::cos(glfwGetTime()/10)/2 + 0.23,glm::cos(glfwGetTime()/10)/2+ 0.01,1.0);
         float radius = 8.0;
         glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
         sunLightColor = glm::vec3(glm::cos(glfwGetTime()/10.0) / 2.0 + 0.5);
@@ -473,6 +475,17 @@ int main() {
         sanduk.setVec3("light.diffuse",  glm::vec3(1.0f));
         sanduk.setVec3("light.specular", 0.2, 0.2, 0.2);
         sanduk.setVec3("viewPos", cameraPos);
+        //spotLight sanduk
+        sanduk.setFloat("spotLight.lightConst", lightConst);
+        sanduk.setFloat("spotLight.linearConst", linearConst);
+        sanduk.setFloat("spotLight.quadraticConst", quadraticConst);
+        sanduk.setInt("spotLight.spotLightFlag", spotLightFlag);
+        sanduk.setVec3("spotLight.position", cameraPos);
+        sanduk.setVec3("spotLight.direction", cameraFront);
+        sanduk.setVec3("spotLight.color", glm::vec3 (1.0f));
+        sanduk.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+        sanduk.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+        sanduk.setVec3("sunLightDirection", sunLightDirection);
 
         wood_texture.activate(GL_TEXTURE0);
 
@@ -494,7 +507,18 @@ int main() {
             model_obelisk = glm::translate(model_obelisk, glm::vec3(-3.0f, 0.2f, -5.0f));
             model_obelisk = glm::scale(model_obelisk, glm::vec3(0.3f, 0.50f,  0.3f));
 
+            //spotLight specification
+            obelisk.setFloat("spotLight.lightConst", lightConst);
+            obelisk.setFloat("spotLight.linearConst", linearConst);
+            obelisk.setFloat("spotLight.quadraticConst", quadraticConst);
+            obelisk.setInt("spotLight.spotLightFlag", spotLightFlag);
+            obelisk.setVec3("spotLight.position", cameraPos);
+            obelisk.setVec3("spotLight.direction", cameraFront);
+            obelisk.setVec3("spotLight.color", glm::vec3 (1.0f));
+            obelisk.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+            obelisk.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
 
+//
             obelisk.setMat4("model", model_obelisk);
             obelisk.setMat4("view", view);
             obelisk.setMat4("projection", projection);
@@ -513,6 +537,21 @@ int main() {
         modelShader.setVec3("sunLightColor", sunLightColor);
         modelShader.setVec3("sunLightDirection", sunLightDirection);
 
+        //spotLight for model
+        modelShader.setFloat("spotLight.lightConst", lightConst);
+        modelShader.setFloat("spotLight.linearConst", linearConst);
+        modelShader.setFloat("spotLight.quadraticConst", quadraticConst);
+        modelShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+        modelShader.setVec3("spotLight.position", cameraPos);
+        modelShader.setVec3("spotLight.direction", cameraFront);
+        modelShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+        modelShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+        modelShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+        modelShader.setVec3("lightColor", lightColor);
+        modelShader.setVec3("viewPos", cameraPos);
+
+        modelShader.setVec3("dirLight.direction", sunLightDirection);
+        modelShader.setVec3("dirLight.color", sunLightColor);
         ourModel.Draw(modelShader);
 
         glfwSwapBuffers(window);
