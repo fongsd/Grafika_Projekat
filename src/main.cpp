@@ -26,7 +26,7 @@ const unsigned int SCR_HEIGHT = 1024;
 
 //Vectors of camera
 glm::vec3 lightColor = glm::vec3(0.2f, 0.4f, 0.4f);
-glm::vec3 lightPosition = glm::vec3(2.0 ,-0.1,  -7.0);
+glm::vec3 lightPosition = glm::vec3(2.0f ,2.0f,  -7.0f);
 
 //sunlight
 glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -45,6 +45,9 @@ float quadraticConst = 0.032f;
 //spotlight
 glm::vec3 spotlightColor = glm::vec3(1.0f);
 int spotLightFlag = 1;
+
+//day and night
+bool stop = false;
 
 //timing
 float delta_time = 0.0f;
@@ -87,8 +90,8 @@ int main() {
     glfwSetKeyCallback(window, key_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
-
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+//
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -138,47 +141,48 @@ int main() {
 
     float cube [] =
             {
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-                    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-                    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+                    // positions          // normals           // texture coords
+                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+                    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+                    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-                    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+                    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-                    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-                    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-                    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-                    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-                    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-                    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+                    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+                    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-                    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+                    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+                    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
             };
 
     unsigned int cubeVBO, cubeVAO;
@@ -207,13 +211,6 @@ int main() {
     Shader obelisk = Shader(FileSystem::getPath("resources/shaders/obelisk.vert"), FileSystem::getPath("resources/shaders/obelisk.frag"));
     kocka.use();
     kocka.setVec3("lightColor", lightColor);//boja kocke na vrhu obeliska
-
-    obelisk.use();
-    obelisk.setVec3("lightColor", lightColor);
-    obelisk.setVec3("objectColor", glm::vec3(0.76, 0.698, 0.52));
-    obelisk.setVec3("material.ambient", glm::vec3(0.2f));
-    obelisk.setVec3("material.diffuse", glm::vec3(0.60f, 0.3f, 0.2f));
-    obelisk.setVec3("lightPosition", lightPosition);
 
     Shader sanduk = Shader(FileSystem::getPath("resources/shaders/sanduk.vert"), FileSystem::getPath("resources/shaders/sanduk.frag"));
     sanduk.use();
@@ -310,14 +307,25 @@ int main() {
 
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glClearColor(0.2, 0.5, 0.4,1.0);
+
+
     while(!glfwWindowShouldClose(window)){
 
+        float radius = 3.0f;
+        float hour = 0.0f;
 
-        glClearColor(glm::cos(glfwGetTime()/10)/2 + 0.3,glm::cos(glfwGetTime()/10)/2 + 0.23,glm::cos(glfwGetTime()/10)/2+ 0.01,1.0);
-        float radius = 8.0;
-        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,2.5,  sin(glfwGetTime())*radius);
+
+        glm::mat4 rotation_per_hour = glm::mat4(1.0f);
+        if(!stop) {
+            rotation_per_hour = glm::rotate(rotation_per_hour, glm::radians(0.5f), glm::vec3(-0.1, 0.0f, 0.1));
+        }
+
+        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,0.5,  sin(glfwGetTime())*radius);
         sunLightColor = glm::vec3(glm::cos(glfwGetTime()/10.0) / 2.0 + 0.5);
-        //sunLightDirection = glm::vec3(-max(glm::cos(glfwGetTime()/5.0), 0.0), -max(glm::sin(glfwGetTime()/5.0), 0.0), 0.0);
+        sunLightDirection = glm::vec3(rotation_per_hour * glm::vec4(sunLightDirection, 0.1));
+
 
         processInput(window);
 
@@ -464,18 +472,27 @@ int main() {
 
         model_cube = glm::mat4(1.0f);
         model_cube = glm::translate(model_cube, glm::vec3(1.3, 0.12, -2.3));
+        model_cube = glm::rotate(model_cube, glm::radians(25.f), glm::vec3(0.0, 1.0, 0.0));
         model_cube = glm::scale(model_cube, glm::vec3(cube_scale));
+
         sanduk.setMat4("model", model_cube);
         sanduk.setMat4("view", view);
         sanduk.setMat4("projection", projection);
-        sanduk.setInt("material.diffuse", 0);
-        sanduk.setVec3("lightPosition", lightPosition);
-        sanduk.setVec3("lightColor", lightColor);
-        sanduk.setVec3("light.ambient",  0.6f, 0.6f, 0.6f);
-        sanduk.setVec3("light.diffuse",  glm::vec3(1.0f));
-        sanduk.setVec3("light.specular", 0.2, 0.2, 0.2);
+        //viewPos
         sanduk.setVec3("viewPos", cameraPos);
-        //spotLight sanduk
+
+        //sun light (directional light)
+        sanduk.setVec3("dirLight.direction", sunLightDirection);
+        sanduk.setVec3("dirLight.color", sunLightColor);
+
+        //bug light (point light)
+        sanduk.setFloat("pointLight.lightConst", lightConst);
+        sanduk.setFloat("pointLight.linearConst", linearConst);
+        sanduk.setFloat("pointLight.quadraticConst", quadraticConst);
+        sanduk.setVec3("pointLight.position", lightPosition);
+        sanduk.setVec3("pointLight.color", lightColor);
+
+        //spotlight
         sanduk.setFloat("spotLight.lightConst", lightConst);
         sanduk.setFloat("spotLight.linearConst", linearConst);
         sanduk.setFloat("spotLight.quadraticConst", quadraticConst);
@@ -485,8 +502,10 @@ int main() {
         sanduk.setVec3("spotLight.color", glm::vec3 (1.0f));
         sanduk.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
         sanduk.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-        sanduk.setVec3("sunLightDirection", sunLightDirection);
 
+        sanduk.setFloat("material.shininess", 64.0f);
+
+        sanduk.setInt("material.diffuse", 0);
         wood_texture.activate(GL_TEXTURE0);
 
         sanduk.setInt("material.specular", 1);
@@ -495,30 +514,45 @@ int main() {
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        obelisk.use();
+
+        //sun light (directional light)
+        obelisk.setVec3("dirLight.direction", sunLightDirection);
+        obelisk.setVec3("dirLight.color", sunLightColor);
+
+        //bug light (point light)
+        obelisk.setFloat("pointLight.lightConst", lightConst);
+        obelisk.setFloat("pointLight.linearConst", linearConst);
+        obelisk.setFloat("pointLight.quadraticConst", quadraticConst);
+        obelisk.setVec3("pointLight.position", lightPosition);
+        obelisk.setVec3("pointLight.color", lightColor);
+
+        //spotlight
+        obelisk.setFloat("spotLight.lightConst", lightConst);
+        obelisk.setFloat("spotLight.linearConst", linearConst);
+        obelisk.setFloat("spotLight.quadraticConst", quadraticConst);
+        obelisk.setInt("spotLight.spotLightFlag", spotLightFlag);
+        obelisk.setVec3("spotLight.position", cameraPos);
+        obelisk.setVec3("spotLight.direction", cameraFront);
+        obelisk.setVec3("spotLight.color", glm::vec3 (1.0f));
+        obelisk.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+        obelisk.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+
+        obelisk.setVec3("material.ambient", glm::vec3(0.0215,	0.1745, 0.0215));
+        obelisk.setVec3("material.diffuse", glm::vec3(0.07568, 0.61424, 0.07568));
+        obelisk.setVec3("material.specular", glm::vec3(0.633, 0.727811, 0.633));
+        obelisk.setFloat("material.shininess", 0.6);
+
+        obelisk.setVec3("viewPos", lightPosition);
 
         for (int i = 0; i < 5; i++) {
-            obelisk.setVec3("viewPos", lightPosition);
-
-            obelisk.use();
-
+            
             glm::mat4 model_obelisk = glm::mat4(1.0f);
-            float angle = 0.50f;
+            float angle = 25.0f;
             model_obelisk = glm::translate(model_obelisk, glm::vec3(0.0f, angle * i, 0.0f));
             model_obelisk = glm::translate(model_obelisk, glm::vec3(-3.0f, 0.2f, -5.0f));
-            model_obelisk = glm::scale(model_obelisk, glm::vec3(0.3f, 0.50f,  0.3f));
+            model_obelisk = glm::scale(model_obelisk, glm::vec3(0.02f, 5000.0f,  0.02f));
 
-            //spotLight specification
-            obelisk.setFloat("spotLight.lightConst", lightConst);
-            obelisk.setFloat("spotLight.linearConst", linearConst);
-            obelisk.setFloat("spotLight.quadraticConst", quadraticConst);
-            obelisk.setInt("spotLight.spotLightFlag", spotLightFlag);
-            obelisk.setVec3("spotLight.position", cameraPos);
-            obelisk.setVec3("spotLight.direction", cameraFront);
-            obelisk.setVec3("spotLight.color", glm::vec3 (1.0f));
-            obelisk.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-            obelisk.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-
-//
             obelisk.setMat4("model", model_obelisk);
             obelisk.setMat4("view", view);
             obelisk.setMat4("projection", projection);
@@ -633,6 +667,15 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         }
         else{
             spotLightFlag = 1;
+        }
+    }
+
+    if(key == GLFW_KEY_SPACE && action == GLFW_PRESS){
+        if(stop == false){
+            stop = true;
+        }
+        else{
+            stop = false;
         }
     }
 
