@@ -32,6 +32,9 @@ glm::vec3 lightPosition = glm::vec3(2.0f ,2.0f,  -7.0f);
 glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
 glm::vec3 sunLightColor = glm::vec3(0.8f);
 
+//sky c
+glm::vec3 skyColor = glm::vec3(0.2, 0.5, 0.4);
+
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
@@ -308,14 +311,13 @@ int main() {
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    glClearColor(0.2, 0.5, 0.4,1.0);
 
-
+    float skyColorIntensityBoost = 0.0;
     while(!glfwWindowShouldClose(window)){
 
-        float radius = 3.0f;
-        float hour = 0.0f;
+        glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
 
+        float radius = 3.0f;
 
         glm::mat4 rotation_per_hour = glm::mat4(1.0f);
         if(!stop) {
@@ -545,12 +547,14 @@ int main() {
 
         obelisk.setVec3("viewPos", lightPosition);
 
-        for (int i = 0; i < 5; i++) {
-            
+        for (int i = 0; i < 11; i++) {
+
+            float radius = 7.0f;
             glm::mat4 model_obelisk = glm::mat4(1.0f);
-            float angle = 25.0f;
-            model_obelisk = glm::translate(model_obelisk, glm::vec3(0.0f, angle * i, 0.0f));
-            model_obelisk = glm::translate(model_obelisk, glm::vec3(-3.0f, 0.2f, -5.0f));
+            float angle = 30.0f;
+
+            model_obelisk = glm::translate(model_obelisk, glm::vec3(radius * glm::cos(glm::radians(i*angle)) + 5.0f, 0.0, radius * glm::sin(glm::radians(i*angle))-5.0f));
+            //model_obelisk = glm::translate(model_obelisk, glm::vec3(-3.0f, 0.2f, -5.0f));
             model_obelisk = glm::scale(model_obelisk, glm::vec3(0.02f, 5000.0f,  0.02f));
 
             obelisk.setMat4("model", model_obelisk);
