@@ -478,7 +478,6 @@ int main() {
 
         model_cube = glm::mat4(1.0f);
         model_cube = glm::translate(model_cube, glm::vec3(1.3, 0.12, -2.3));
-        model_cube = glm::rotate(model_cube, glm::radians(25.f), glm::vec3(0.0, 1.0, 0.0));
         model_cube = glm::scale(model_cube, glm::vec3(cube_scale));
 
         sanduk.setMat4("model", model_cube);
@@ -520,6 +519,22 @@ int main() {
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        model_cube = glm::translate(model_cube, glm::vec3(1.1 , 0.0, 1.2));
+        model_cube = glm::rotate(model_cube, glm::radians(29.0f), glm::vec3(0.0, 1.0, 0.0));
+        sanduk.setMat4("model", model_cube);
+        sanduk.setMat4("view", view);
+        sanduk.setMat4("projection", projection);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        model_cube = glm::translate(model_cube, glm::vec3(0.1 , 1.0, -0.15));
+        model_cube = glm::rotate(model_cube, glm::radians(18.0f), glm::vec3(0.0, 1.0, 0.0));
+        sanduk.setMat4("model", model_cube);
+        sanduk.setMat4("view", view);
+        sanduk.setMat4("projection", projection);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
         obelisk.use();
 
         //sun light (directional light)
@@ -551,7 +566,7 @@ int main() {
 
         obelisk.setVec3("viewPos", lightPosition);
 
-        for (int i = 0; i < 11 && beams; i++) {
+        for (int i = 0; i < 12 && beams; i++) {
 
             float radius = 7.0f;
             glm::mat4 model_obelisk = glm::mat4(1.0f);

@@ -59,9 +59,10 @@ void main()
 
     vec3 result = vec3(0.0, 0.0, 0.0);
 
+    //beams are much stronger light than spotlight and pointlight so they are not affected by these lights
     result += calculateDirLight(dirLight, material, fragPos, viewPos, norm);
-    result += calculatePointLight(pointLight, material, fragPos, viewPos, norm);
-    result += calculateSpotLight(spotLight, material, fragPos, viewPos, norm);
+    //result += calculatePointLight(pointLight, material, fragPos, viewPos, norm);
+    //result += calculateSpotLight(spotLight, material, fragPos, viewPos, norm);
 
     fragColor = vec4(result, 1.0);
 }
@@ -72,19 +73,23 @@ vec3 calculateDirLight(DirLight dirLight, Material material, vec3 fragPos, vec3 
 
     //ambient
     float ambientStrength = 0.4;
-    vec3 ambient = ambientStrength * dirLight.color * material.ambient;
+    //vec3 ambient = ambientStrength * dirLight.color * material.ambient;
+    vec3 ambient = ambientStrength * vec3(1.0, 1.0, 1.0) * material.ambient;
 
     //diffuse
-    float diff = max(dot(-lightDir, norm),0.0)+1.0; //da bi bili svetliji zraci
-    vec3 diffuse = diff * dirLight.color * material.diffuse;
+    //float diff = max(dot(-lightDir, norm),0.0);
+    float diff = 1.0;
+    //vec3 diffuse = diff * dirLight.color * material.diffuse;
+    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0) * material.diffuse; //so beams are not dependent on sun light color
 
     //specular
     vec3 viewDir = normalize(fragPos - viewPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(-viewDir, reflectDir), 0.0), material.shininess);
 
-    float specularStrength = 0.5;
-    vec3 specular = specularStrength * dirLight.color * material.specular * spec;
+    float specularStrength = 1.0;
+    //vec3 specular = specularStrength * dirLight.color * material.specular * spec;
+    vec3 specular = specularStrength * vec3(1.0, 1.0, 1.0) * material.specular * spec;
 
     vec3 dir = ambient + diffuse + specular;
     return dir;
