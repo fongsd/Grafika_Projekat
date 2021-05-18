@@ -32,8 +32,12 @@ glm::vec3 lightPosition = glm::vec3(2.0f ,2.0f,  -7.0f);
 glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
 glm::vec3 sunLightColor = glm::vec3(0.8f);
 
-//sky c
+//sky color
 glm::vec3 skyColor = glm::vec3(0.2, 0.5, 0.4);
+
+//beams - press l to cast
+bool beams = false;
+
 
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
@@ -547,7 +551,7 @@ int main() {
 
         obelisk.setVec3("viewPos", lightPosition);
 
-        for (int i = 0; i < 11; i++) {
+        for (int i = 0; i < 11 && beams; i++) {
 
             float radius = 7.0f;
             glm::mat4 model_obelisk = glm::mat4(1.0f);
@@ -680,6 +684,15 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         }
         else{
             stop = false;
+        }
+    }
+
+    if(key == GLFW_KEY_L && action == GLFW_PRESS){
+        if(beams == false){
+            beams = true;
+        }
+        else{
+            beams = false;
         }
     }
 
