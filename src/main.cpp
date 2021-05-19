@@ -678,6 +678,19 @@ int main() {
         ourModel.Draw(modelShader);
 
         rockShader.use();
+
+        rockShader.setFloat("spotLight.lightConst", lightConst);
+        rockShader.setFloat("spotLight.linearConst", linearConst);
+        rockShader.setFloat("spotLight.quadraticConst", quadraticConst);
+        rockShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+        rockShader.setVec3("spotLight.position", cameraPos);
+        rockShader.setVec3("spotLight.direction", cameraFront);
+        rockShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+        rockShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+        rockShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+        rockShader.setVec3("lightColor", lightColor);
+        rockShader.setVec3("viewPos", cameraPos);
+        
         rockShader.setMat4("projection", projection);
         rockShader.setMat4("view", view);
         rockShader.setVec3("dirLight.direction", sunLightDirection);
