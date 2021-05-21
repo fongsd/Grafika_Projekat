@@ -457,6 +457,12 @@ int main() {
 //
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //
+        //CULL FACE
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
+
+
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
 
@@ -474,6 +480,8 @@ int main() {
 
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 12);
+        //DISABLING CULL FACE
+        glDisable(GL_CULL_FACE);
 
         shader_pyramid.setMat4("model", model);
         shader_pyramid.setMat4("view", view);
