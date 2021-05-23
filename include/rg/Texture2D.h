@@ -26,6 +26,28 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
     }
 
+    void specify_texture_image(GLenum target,
+                               GLint internalFormat,
+                               GLsizei width,
+                               GLsizei height,
+                               GLenum format,
+                               GLenum type,
+                               GLint level = 0,
+                               GLint border = 0,
+                               const GLvoid * data = NULL){
+        glTexImage2D(target, level, GL_DEPTH_COMPONENT, width, height, border, GL_DEPTH_COMPONENT, GL_FLOAT, data);
+    }
+
+    void attach_framebuffer(unsigned int framebuffer){
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_tex, 0);
+        //We need to explicitly tell OpenGL that we won't render any color data
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    };
+
     void reflect_vertically(){
         stbi_set_flip_vertically_on_load(true);
     }

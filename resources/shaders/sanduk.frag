@@ -70,11 +70,11 @@ vec3 calculateDirLight(DirLight dirLight, Material material, vec3 fragPos, vec3 
     vec3 lightDir = normalize(dirLight.direction);
 
     //ambient
-    float ambientStrength = 0.2;
+    float ambientStrength = 0.1;
     vec3 ambient = ambientStrength * dirLight.color * texture(material.diffuse, texCords).rgb;
 
     //diffuse
-    float diff = max(dot(-lightDir, norm),0.0);
+    float diff = max(dot(-lightDir, norm), 0.0);
     vec3 diffuse = diff * dirLight.color * texture(material.diffuse, texCords).rgb;
 
     //specular

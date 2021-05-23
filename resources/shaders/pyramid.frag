@@ -76,10 +76,10 @@ vec3 calculateDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 norm)
     vec3 reflectDir = reflect(lightDir, norm);
     vec3 viewDir = normalize(fragPos - viewPos);
     float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shinnes);
-    float specularStrength = 0.5;
+    float specularStrength = 0.2;
     vec3 specular = specularStrength * dirLight.color * spec;
 
-    vec3 dir = ambient + diffuse;
+    vec3 dir = ambient + diffuse + specular;
     return dir;
 }
 
@@ -99,7 +99,7 @@ vec3 calculatePointLight(PointLight pointLight, vec3 fragPos, vec3 viewPos, vec3
 
     //specular
     float shiness = 32;
-    float specularStrength = 0.5;
+    float specularStrength = 0.2;
 
     vec3 reflectDir = reflect(-lightDir, norm);
     vec3 viewDir = normalize(fragPos - viewPos);
@@ -128,7 +128,7 @@ vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 no
 
     //specular
     float shiness = 32;
-    float specularStrength = 0.5;
+    float specularStrength = 0.2;
 
     vec3 reflectDir = reflect(-lightDir, norm);
     vec3 viewDir = normalize(fragPos - viewPos);

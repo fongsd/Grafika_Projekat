@@ -29,7 +29,7 @@ glm::vec3 lightColor = glm::vec3(0.2f, 0.4f, 0.4f);
 glm::vec3 lightPosition = glm::vec3(2.0f ,2.0f,  -7.0f);
 
 //sunlight
-glm::vec3 sunLightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
+glm::vec3 sunLightDirection = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(-1.0f, -2.0f, -1.0f, 1.0f));
 glm::vec3 sunLightColor = glm::vec3(0.8f);
 
 //sky color
@@ -38,6 +38,12 @@ glm::vec3 skyColor = glm::vec3(0.2, 0.5, 0.4);
 //beams - press l to cast
 bool beams = false;
 
+//rocks instancing
+unsigned int amount = 500;
+glm::mat4* modelMatrices = new glm::mat4[amount];
+float radius = 80.0;
+float offset = 35.0f;
+unsigned int buffer;
 
 //camera
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
@@ -70,6 +76,34 @@ float fov = 45.0f;
 // -------------------------------------------------------
 
 
+GLsizei SHADOW_WIDTH = 1024;
+GLsizei SHADOW_HEIGHT = 1024;
+
+void renderTruck(shader modelShader, Model ourModel, glm::mat4 view, glm::mat4 projection);
+void renderRocks(shader rockShader, Model rockModel, glm::mat4 view, glm::mat4 projection);
+void generateRocks(Model rockModel);
+void renderPyramid(Shader pyramidShader, Texture2D pyramidTexture, unsigned VAO, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
+void renderGround(Shader groundShader, Texture2D groundTexture, std::string texUniformName, unsigned int VAO, glm::mat4 view,
+                  glm::mat4 projection);
+void renderFirefly(Shader fireflyShader, unsigned VAO, glm::mat4 view, glm::mat4 projection);
+void renderBox(Shader boxShader, unsigned VAO, Texture2D woodTexture, std::string woodTexUniformName,
+               Texture2D metalTexture, std::string metalTexUniformName, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
+void renderBoxes(Shader boxShader, unsigned VAO, Texture2D woodTexture, Texture2D metalTexture, glm::mat4 view, glm::mat4 projection);
+void renderBeams(Shader obeliskShader, unsigned VAO, glm::mat4 view, glm::mat4 projection);
+
+void renderPyramids(Shader pyramidShader, unsigned VAO, Texture2D pyramidTexture, glm::mat4 view, glm::mat4 projection);
+
+void initLoop();
+
+void renderScene(Shader pyramidShader, Texture2D pyramidTexture,
+                 Shader groundShader, Texture2D groundTexture, unsigned VAOs[],
+                 Shader fireflyShader, unsigned cubeVAO,
+                 Shader boxShader, Texture2D woodTexture, Texture2D metalTexture,
+                 Shader obeliskShader,
+                 shader truckShader, Model truckModel,
+                 shader rockShader, Model rockModel,
+                 glm::mat4 view, glm::mat4 projection);
+
 int main() {
     // glfw: initialize and configure
     // ------------------------------
@@ -98,7 +132,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 //
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -107,14 +141,6 @@ int main() {
     }
 
     float pyramid[] = {
-//        -0.5, 0.0, -0.5, 0.0, 0.0, //bottom-left 0
-//        -0.5, 0.0, 0.5, 1.0, 0.0,//bottom-right 1
-//        0.5, 0.0, 0.5, 0.0, 1.0,//top-right 2
-
-//        -0.5, 0.0, -0.5, 0.0, 0.0,//bottom-left 0
-//        0.5, 0.0, 0.5, 0.0, 1.0,//top-right 2
-//        0.5, 0.0, -0.5, 1.0, 1.0,//top-left 3
-
         -0.5, 0.0, -0.5, 0.0, 0.0,  -1.25f, 1.25f, 0.0f,//bottom-left 0
         -0.5, 0.0, 0.5, 1.0, 0.0, -1.25f, 1.25f, 0.0f,//bottom-right 1
         0.0, 0.5, 0.0, 0.5, 1.0, -1.25f, 1.25f, 0.0f,//peek 4
@@ -130,67 +156,62 @@ int main() {
         0.5, 0.0, -0.5, 0.0, 0.0,  0.0f, 1.25f, -1.25f,//top-left 3
         -0.5, 0.0, -0.5, 1.0, 0.0, 0.0f, 1.25f, -1.25f,//bottom-left 0
         0.0, 0.5, 0.0, 0.5, 1.0, 0.0f, 1.25f, -1.25f//peek 4
-
     };
 
     float ground[] = {
-            150.0f, 0.0f,  150.0f,  150.0f, 0.0f,
-            -150.0f, 0.0f,  150.0f,  0.0f, 0.0f,
-            -150.0f, 0.0f, -150.0f,  0.0f, 150.0f,
+        150.0f, 0.0f,  150.0f,  150.0f, 0.0f,
+        -150.0f, 0.0f,  150.0f,  0.0f, 0.0f,
+        -150.0f, 0.0f, -150.0f,  0.0f, 150.0f,
 
-            150.0f, 0.0f,  150.0f,  150.0f, 0.0f,
-            -150.0f, 0.0f, -150.0f,  0.0f, 150.0f,
-            150.0f, 0.0f, -150.0f,  150.0f, 150.0f
-
+        150.0f, 0.0f,  150.0f,  150.0f, 0.0f,
+        -150.0f, 0.0f, -150.0f,  0.0f, 150.0f,
+        150.0f, 0.0f, -150.0f,  150.0f, 150.0f
     };
 
-    //pocetak kocke
+    float cube [] = {
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-    float cube [] =
-            {
-                    // positions          // normals           // texture coords
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-                    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-                    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-                    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-                    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-                    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-                    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-                    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-                    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-                    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-            };
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    };
 
     unsigned int cubeVBO, cubeVAO;
 
@@ -213,28 +234,14 @@ int main() {
 
     glBindVertexArray(0);
 
-    //dodavano odavde
-    Shader kocka = Shader(FileSystem::getPath("resources/shaders/cube.vert"), FileSystem::getPath("resources/shaders/cube.frag"));
-    Shader obelisk = Shader(FileSystem::getPath("resources/shaders/obelisk.vert"), FileSystem::getPath("resources/shaders/obelisk.frag"));
-    kocka.use();
-    kocka.setVec3("lightColor", lightColor);//boja kocke na vrhu obeliska
+    Shader obeliskShader = Shader(FileSystem::getPath("resources/shaders/obelisk.vert"), FileSystem::getPath("resources/shaders/obelisk.frag"));
 
-    Shader sanduk = Shader(FileSystem::getPath("resources/shaders/sanduk.vert"), FileSystem::getPath("resources/shaders/sanduk.frag"));
-    sanduk.use();
-//
-    unsigned indices_pyramid[] = {
-        0, 1, 2,
-        0, 2, 3,
-        0, 1, 4,
-        1, 2, 4,
-        2, 3, 4,
-        3, 0, 4
-    };
+    Shader fireflyShader = Shader(FileSystem::getPath("resources/shaders/cube.vert"), FileSystem::getPath("resources/shaders/cube.frag"));
+    fireflyShader.use();
+    fireflyShader.setVec3("lightColor", lightColor);
 
-    unsigned indices_ground[] = {
-        0, 1, 2,
-        0, 2, 3
-    };
+    Shader boxShader = Shader(FileSystem::getPath("resources/shaders/sanduk.vert"), FileSystem::getPath("resources/shaders/sanduk.frag"));
+    boxShader.use();
 
     //Vertex Buffer Object & Vertex Array Object
     unsigned VBOs[2], VAOs[2];
@@ -271,7 +278,7 @@ int main() {
     glBindVertexArray(0);
 
     //Create shaders
-    Shader shader_pyramid = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
+    Shader pyramidShader = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
     Shader ground_shader = Shader (FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
 
 //    Pyramid texture
@@ -320,400 +327,35 @@ int main() {
 
     //Rendering loop
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    unsigned int amount = 1000;
-    glm::mat4* modelMatrices;
-    modelMatrices = new glm::mat4[amount];
-    srand(glfwGetTime()); // initialize random seed
-    float radius = 150.0;
-    float offset = 80.50f;
-    for (unsigned int i = 0; i < amount; i++)
-    {
-        glm::mat4 model = glm::mat4(1.0f);
-        // 1. translation: displace along circle with 'radius' in range [-offset, offset]
-        float angle = (float)i / (float)amount * 360.0f;
-        float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-        float x = sin(angle) * radius + displacement;
-        float z = cos(angle) * radius + displacement;
-        model = glm::translate(model, glm::vec3(x, -0.01, z));
+    generateRocks(rockModel);
 
-        // 2. scale: Scale between 0.05 and 0.25f
-        float scale = (rand() % 20) / 100.0f + 0.05;
-        model = glm::scale(model, glm::vec3(scale));
-
-        // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
-        float rotAngle = (rand() % 360);
-//        model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
-
-        // 4. now add to list of matrices
-        modelMatrices[i] = model;
-    }
-
-    // configure instanced array
-    // -------------------------
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
-
-    // set transformation matrices as an instance vertex attribute (with divisor 1)
-    // note: we're cheating a little by taking the, now publicly declared, VAO of the model's mesh(es) and adding new vertexAttribPointers
-    // normally you'd want to do this in a more organized fashion, but for learning purposes this will do.
-    // -----------------------------------------------------------------------------------------------------------------------------------
-    for (unsigned int i = 0; i < rockModel.meshes.size(); i++)
-    {
-        unsigned int VAO = rockModel.meshes[i].VAO;
-        glBindVertexArray(VAO);
-        // set attribute pointers for matrix (4 times vec4)
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
-
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
-
-        glBindVertexArray(0);
-    }
-
-
-
-    float skyColorIntensityBoost = 0.0;
     while(!glfwWindowShouldClose(window)){
-
-        glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
-
-        float radius = 3.0f;
-
-        glm::mat4 rotation_per_hour = glm::mat4(1.0f);
-        if(!stop) {
-            rotation_per_hour = glm::rotate(rotation_per_hour, glm::radians(0.5f), glm::vec3(-0.1, 0.0f, 0.1));
-        }
-
-        glm::vec3 lightPosition = glm::vec3(cos(glfwGetTime()) * radius  ,0.5,  sin(glfwGetTime())*radius);
-        sunLightColor = glm::vec3(glm::cos(glfwGetTime()/10.0) / 2.0 + 0.5);
-        sunLightDirection = glm::vec3(rotation_per_hour * glm::vec4(sunLightDirection, 0.1));
-
-
+        initLoop();
         processInput(window);
 
-        //frame-time logic
-        float current_frame = glfwGetTime();
-        delta_time = current_frame - last_frame;
-        last_frame = current_frame;
+        //framebuffer for depth mapping
+        unsigned int depthMapFBO;
+        glGenFramebuffers(1, &depthMapFBO);
 
-        //Create model matrix
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-        //Create view matrix
-        glm::mat4 view = glm::mat4(1.0f);
+        //texture2D for depth mapping
+        Texture2D depthMap = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST);
+        depthMap.specify_texture_image(GL_TEXTURE_2D, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, GL_DEPTH_COMPONENT, GL_FLOAT);
 
-        //Create view matrix
-        view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
+        //attach framebuffer
+        depthMap.attach_framebuffer(depthMapFBO);
 
-        //Create projection matrix
-        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
+        //view and projection matrices
+        glm::mat4 view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 1000.0f);
 
-//        //Set matrices for pyramid
-        shader_pyramid.use();
-        shader_pyramid.setMat4("model", model);
-        shader_pyramid.setMat4("view", view);
-        shader_pyramid.setMat4("projection", projection);
-
-        //viewPos
-        shader_pyramid.setVec3("viewPos", cameraPos);
-
-        //spotLight specification
-        shader_pyramid.setFloat("spotLight.lightConst", lightConst);
-        shader_pyramid.setFloat("spotLight.linearConst", linearConst);
-        shader_pyramid.setFloat("spotLight.quadraticConst", quadraticConst);
-        shader_pyramid.setInt("spotLight.spotLightFlag", spotLightFlag);
-        shader_pyramid.setVec3("spotLight.position", cameraPos);
-        shader_pyramid.setVec3("spotLight.direction", cameraFront);
-        shader_pyramid.setVec3("spotLight.color", glm::vec3 (1.0f));
-        shader_pyramid.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-        shader_pyramid.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-
-//        //sunLight specification
-        shader_pyramid.setVec3("dirLight.direction", sunLightDirection);
-        shader_pyramid.setVec3("dirLight.color", sunLightColor);
-//
-//        //bug1 specification
-        shader_pyramid.setFloat("pointLight.lightConst", lightConst);
-        shader_pyramid.setFloat("pointLight.linearConst", linearConst);
-        shader_pyramid.setFloat("pointLight.quadraticConst", quadraticConst);
-        shader_pyramid.setVec3("pointLight.position", lightPosition);
-        shader_pyramid.setVec3("pointLight.color", lightColor);
-
-//        //pyramid texture
-        shader_pyramid.setInt("texture_pyramid", 0);
-        texture_pyramid.activate(GL_TEXTURE0);
-//
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-        //CULL FACE
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-
-
-        glBindVertexArray(VAOs[0]);
-        glDrawArrays(GL_TRIANGLES, 0, 12);
-
-        glBindVertexArray(0);
-
-        glm::mat4 model_velika = glm::mat4(1.0f);
-        model_velika = glm::translate(model_velika, glm::vec3(5.0f, 0.0f, -5.0f));
-        model_velika = glm::scale(model_velika, glm::vec3(4.0f, 4.0f, 4.0f));
-
-        shader_pyramid.setMat4("model", model_velika);
-        shader_pyramid.setMat4("view", view);
-        shader_pyramid.setMat4("projection", projection);
-
-        texture_pyramid.activate(GL_TEXTURE0);
-
-        glBindVertexArray(VAOs[0]);
-        glDrawArrays(GL_TRIANGLES, 0, 12);
-        //DISABLING CULL FACE
-        glDisable(GL_CULL_FACE);
-
-        shader_pyramid.setMat4("model", model);
-        shader_pyramid.setMat4("view", view);
-        shader_pyramid.setMat4("projection", projection);
-
-        //ground
-        glm::mat4 ground_model = glm::mat4(1.0f);
-
-        ground_shader.use();
-        ground_shader.setMat4("model", ground_model);
-        ground_shader.setMat4("view", view);
-        ground_shader.setMat4("projection", projection);
-
-
-        //viewPos
-        ground_shader.setVec3("viewPos", cameraPos);
-
-        //sun light (directional light)
-        ground_shader.setVec3("dirLight.direction", sunLightDirection);
-        ground_shader.setVec3("dirLight.color", sunLightColor);
-
-        //bug light (point light)
-        ground_shader.setFloat("pointLight.lightConst", lightConst);
-        ground_shader.setFloat("pointLight.linearConst", linearConst);
-        ground_shader.setFloat("pointLight.quadraticConst", quadraticConst);
-        ground_shader.setVec3("pointLight.position", lightPosition);
-        ground_shader.setVec3("pointLight.color", lightColor);
-
-        //spotlight
-        ground_shader.setFloat("spotLight.lightConst", lightConst);
-        ground_shader.setFloat("spotLight.linearConst", linearConst);
-        ground_shader.setFloat("spotLight.quadraticConst", quadraticConst);
-        ground_shader.setInt("spotLight.spotLightFlag", spotLightFlag);
-        ground_shader.setVec3("spotLight.position", cameraPos);
-        ground_shader.setVec3("spotLight.direction", cameraFront);
-        ground_shader.setVec3("spotLight.color", glm::vec3 (1.0f));
-        ground_shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-        ground_shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-
-        // texture activation
-        ground_shader.setInt("texture_sand", 0);
-        sand_texture.activate(GL_TEXTURE0);
-
-
-        glBindVertexArray(VAOs[1]);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-
-        glBindVertexArray(cubeVAO);
-//        nova_kocka.use();
-//
-        glm::mat4 model_cube = glm::mat4(1.0f);
-        model_cube = glm::translate(model_cube, lightPosition);
-        float cube_scale = 0.08f;
-
-        kocka.use();
-
-        model_cube = glm::scale(model_cube, glm::vec3(cube_scale));
-        kocka.setMat4("model", model_cube);
-        kocka.setMat4("view", view);
-        kocka.setMat4("projection", projection);
-
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        cube_scale = 0.2;
-
-        sanduk.use();
-
-        model_cube = glm::mat4(1.0f);
-        model_cube = glm::translate(model_cube, glm::vec3(1.3, 0.12, -2.3));
-        model_cube = glm::scale(model_cube, glm::vec3(cube_scale));
-
-        sanduk.setMat4("model", model_cube);
-        sanduk.setMat4("view", view);
-        sanduk.setMat4("projection", projection);
-        //viewPos
-        sanduk.setVec3("viewPos", cameraPos);
-
-        //sun light (directional light)
-        sanduk.setVec3("dirLight.direction", sunLightDirection);
-        sanduk.setVec3("dirLight.color", sunLightColor);
-
-        //bug light (point light)
-        sanduk.setFloat("pointLight.lightConst", lightConst);
-        sanduk.setFloat("pointLight.linearConst", linearConst);
-        sanduk.setFloat("pointLight.quadraticConst", quadraticConst);
-        sanduk.setVec3("pointLight.position", lightPosition);
-        sanduk.setVec3("pointLight.color", lightColor);
-
-        //spotlight
-        sanduk.setFloat("spotLight.lightConst", lightConst);
-        sanduk.setFloat("spotLight.linearConst", linearConst);
-        sanduk.setFloat("spotLight.quadraticConst", quadraticConst);
-        sanduk.setInt("spotLight.spotLightFlag", spotLightFlag);
-        sanduk.setVec3("spotLight.position", cameraPos);
-        sanduk.setVec3("spotLight.direction", cameraFront);
-        sanduk.setVec3("spotLight.color", glm::vec3 (1.0f));
-        sanduk.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-        sanduk.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-
-        sanduk.setFloat("material.shininess", 64.0f);
-
-        sanduk.setInt("material.diffuse", 0);
-        wood_texture.activate(GL_TEXTURE0);
-
-        sanduk.setInt("material.specular", 1);
-        metal_texture.activate(GL_TEXTURE1);
-
-        glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        model_cube = glm::translate(model_cube, glm::vec3(1.1 , 0.0, 1.2));
-        model_cube = glm::rotate(model_cube, glm::radians(29.0f), glm::vec3(0.0, 1.0, 0.0));
-        sanduk.setMat4("model", model_cube);
-        sanduk.setMat4("view", view);
-        sanduk.setMat4("projection", projection);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        model_cube = glm::translate(model_cube, glm::vec3(0.1 , 1.0, -0.15));
-        model_cube = glm::rotate(model_cube, glm::radians(18.0f), glm::vec3(0.0, 1.0, 0.0));
-        sanduk.setMat4("model", model_cube);
-        sanduk.setMat4("view", view);
-        sanduk.setMat4("projection", projection);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        obelisk.use();
-
-        //sun light (directional light)
-        obelisk.setVec3("dirLight.direction", sunLightDirection);
-        obelisk.setVec3("dirLight.color", sunLightColor);
-
-        //bug light (point light)
-        obelisk.setFloat("pointLight.lightConst", lightConst);
-        obelisk.setFloat("pointLight.linearConst", linearConst);
-        obelisk.setFloat("pointLight.quadraticConst", quadraticConst);
-        obelisk.setVec3("pointLight.position", lightPosition);
-        obelisk.setVec3("pointLight.color", lightColor);
-
-        //spotlight
-        obelisk.setFloat("spotLight.lightConst", lightConst);
-        obelisk.setFloat("spotLight.linearConst", linearConst);
-        obelisk.setFloat("spotLight.quadraticConst", quadraticConst);
-        obelisk.setInt("spotLight.spotLightFlag", spotLightFlag);
-        obelisk.setVec3("spotLight.position", cameraPos);
-        obelisk.setVec3("spotLight.direction", cameraFront);
-        obelisk.setVec3("spotLight.color", glm::vec3 (1.0f));
-        obelisk.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-        obelisk.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-
-        obelisk.setVec3("material.ambient", glm::vec3(0.0215,	0.1745, 0.0215));
-        obelisk.setVec3("material.diffuse", glm::vec3(0.07568, 0.61424, 0.07568));
-        obelisk.setVec3("material.specular", glm::vec3(0.633, 0.727811, 0.633));
-        obelisk.setFloat("material.shininess", 0.6);
-
-        obelisk.setVec3("viewPos", lightPosition);
-
-        for (int i = 0; i < 12 && beams; i++) {
-
-            float radius = 7.0f;
-            glm::mat4 model_obelisk = glm::mat4(1.0f);
-            float angle = 30.0f;
-
-            model_obelisk = glm::translate(model_obelisk, glm::vec3(radius * glm::cos(glm::radians(i*angle)) + 5.0f, 0.0, radius * glm::sin(glm::radians(i*angle))-5.0f));
-            //model_obelisk = glm::translate(model_obelisk, glm::vec3(-3.0f, 0.2f, -5.0f));
-            model_obelisk = glm::scale(model_obelisk, glm::vec3(0.02f, 5000.0f,  0.02f));
-            obelisk.setMat4("model", model_obelisk);
-            obelisk.setMat4("view", view);
-            obelisk.setMat4("projection", projection);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-//
-        modelShader.use();
-        glm::mat4 model_model = glm::mat4(1.0f);
-        model_model = glm::translate(model_model, glm::vec3(-2.0f, 0.3f , 0.0f));
-        model_model = glm::rotate(model_model, (float)glm::radians(-90.0f), glm::vec3(1, 0, 0));
-        model_model = glm::scale(model_model, glm::vec3(0.0001));
-        modelShader.setMat4("model", model_model);
-        modelShader.setMat4("view", view);
-        modelShader.setMat4("projection", projection);
-        modelShader.setVec3("lightPosition", lightPosition);
-        modelShader.setVec3("sunLightColor", sunLightColor);
-        modelShader.setVec3("sunLightDirection", sunLightDirection);
-
-        //spotLight for model
-        modelShader.setFloat("spotLight.lightConst", lightConst);
-        modelShader.setFloat("spotLight.linearConst", linearConst);
-        modelShader.setFloat("spotLight.quadraticConst", quadraticConst);
-        modelShader.setInt("spotLight.spotLightFlag", spotLightFlag);
-        modelShader.setVec3("spotLight.position", cameraPos);
-        modelShader.setVec3("spotLight.direction", cameraFront);
-        modelShader.setVec3("spotLight.color", glm::vec3 (1.0f));
-        modelShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-        modelShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-        modelShader.setVec3("lightColor", lightColor);
-        modelShader.setVec3("viewPos", cameraPos);
-
-        modelShader.setVec3("dirLight.direction", sunLightDirection);
-        modelShader.setVec3("dirLight.color", sunLightColor);
-        ourModel.Draw(modelShader);
-
-        rockShader.use();
-
-        rockShader.setFloat("spotLight.lightConst", lightConst);
-        rockShader.setFloat("spotLight.linearConst", linearConst);
-        rockShader.setFloat("spotLight.quadraticConst", quadraticConst);
-        rockShader.setInt("spotLight.spotLightFlag", spotLightFlag);
-        rockShader.setVec3("spotLight.position", cameraPos);
-        rockShader.setVec3("spotLight.direction", cameraFront);
-        rockShader.setVec3("spotLight.color", glm::vec3 (1.0f));
-        rockShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-        rockShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-        rockShader.setVec3("lightColor", lightColor);
-        rockShader.setVec3("viewPos", cameraPos);
-        
-        rockShader.setMat4("projection", projection);
-        rockShader.setMat4("view", view);
-        rockShader.setVec3("dirLight.direction", sunLightDirection);
-        rockShader.setVec3("dirLight.color", sunLightColor);
-        rockShader.setVec3("viewPos", cameraPos);
-        rockShader.setInt("texture_diffuse1", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, rockModel.textures_loaded[0].id); // note: we also made the textures_loaded vector public (instead of private) from the model class.
-        for (unsigned int i = 0; i < rockModel.meshes.size(); i++)
-        {
-            glBindVertexArray(rockModel.meshes[i].VAO);
-            glDrawElementsInstanced(GL_TRIANGLES, rockModel.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount);
-            glBindVertexArray(0);
-        }
-
+        //render scene
+        renderScene(pyramidShader, texture_pyramid,
+                    ground_shader, sand_texture, VAOs,
+                    fireflyShader, cubeVAO,
+                    boxShader, wood_texture, metal_texture,
+                    obeliskShader, modelShader, ourModel,
+                    rockShader, rockModel,
+                    view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -724,18 +366,84 @@ int main() {
     return 0;
 }
 
+void renderScene(Shader pyramidShader, Texture2D pyramidTexture,
+                 Shader groundShader, Texture2D groundTexture, unsigned VAOs[],
+                 Shader fireflyShader, unsigned cubeVAO,
+                 Shader boxShader, Texture2D woodTexture, Texture2D metalTexture,
+                 Shader obeliskShader,
+                 shader truckShader, Model truckModel,
+                 shader rockShader, Model rockModel,
+                 glm::mat4 view, glm::mat4 projection) {
+    //render pyramids
+    renderPyramids(pyramidShader, VAOs[0], pyramidTexture, view, projection);
+
+    //render ground
+    renderGround(groundShader, groundTexture, "sand_texture", VAOs[1], view, projection);
+
+    //render firefly
+    renderFirefly(fireflyShader, cubeVAO, view, projection);
+
+    //render boxes
+    renderBoxes(boxShader, cubeVAO, woodTexture, metalTexture, view, projection);
+
+    //render laser beams
+    renderBeams(obeliskShader, cubeVAO, view, projection);
+
+    //render model truck
+    renderTruck(truckShader, truckModel, view, projection);
+
+    //render model rock
+    renderRocks(rockShader, rockModel, view, projection);
+}
+
+void initLoop() {
+    glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    float radius = 4.0f;
+    lightPosition = glm::vec3(cos(glfwGetTime())*radius  ,0.5,  sin(glfwGetTime())*radius);
+
+    //frame-time logic
+    float current_frame = glfwGetTime();
+    delta_time = current_frame - last_frame;
+    last_frame = current_frame;
+}
+
+void renderPyramids(Shader pyramidShader, unsigned VAO, Texture2D pyramidTexture, glm::mat4 view, glm::mat4 projection) {
+    // Create model matrix for small pyramid
+    glm::mat4 modelSmallPyramid = glm::mat4(1.0f);
+    modelSmallPyramid = glm::translate(modelSmallPyramid, glm::vec3(2.0f, 0.0f, 0.0f));
+    modelSmallPyramid = glm::scale(modelSmallPyramid, glm::vec3(2.0f, 2.0f, 2.0f));
+
+    //CULL FACE enabled for small pyrmid
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    //render small pyramid
+    renderPyramid(pyramidShader, pyramidTexture, VAO, modelSmallPyramid, view, projection);
+
+    //DISABLING CULL FACE for small pyramid
+    glDisable(GL_CULL_FACE);
+
+    //render big pyramid
+    glm::mat4 modelBigPyramid = glm::mat4(1.0f);
+    modelBigPyramid = glm::translate(modelBigPyramid, glm::vec3(5.0f, 0.0f, -5.0f));
+    modelBigPyramid = glm::rotate(modelBigPyramid, glm::radians(7.0f) ,glm::vec3(0.0f, 1.0f, 0.0f));
+    modelBigPyramid = glm::scale(modelBigPyramid, glm::vec3(4.0f, 4.0f, 4.0f));
+
+    renderPyramid(pyramidShader, pyramidTexture, VAO, modelBigPyramid, view, projection);
+}
+
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-
-
     const float cameraSpeed = 10.0 * delta_time;
 
     //da ne ide kamera ispod y ose
-
     if (cameraPos.y  < 0.3f)
     {
         cameraPos.y = 0.3f;
@@ -767,27 +475,8 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 // glfw: whenever the mouse moves, this callback is called
-
-
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
-//    const float cameraSpeed = 25.0 * delta_time;
-//
-//    if(key == GLFW_KEY_W && action == GLFW_PRESS){
-//        cameraPos += cameraFront * cameraSpeed;
-//    }
-//
-//    if(key == GLFW_KEY_S && action == GLFW_PRESS){
-//        cameraPos -= cameraFront * cameraSpeed;
-//    }
-//
-//    if(key == GLFW_KEY_D && action == GLFW_PRESS){
-//        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-//    }
-//
-//    if(key == GLFW_KEY_A && action == GLFW_PRESS){
-//        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-//    }
     if(key == GLFW_KEY_F && action == GLFW_PRESS){
         if(spotLightFlag == 1){
             spotLightFlag = 0;
@@ -857,4 +546,349 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         fov = 1.0f;
     if (fov > 45.0f)
         fov = 45.0f;
+}
+
+void renderTruck(shader modelShader, Model ourModel, glm::mat4 view, glm::mat4 projection){
+    //Model
+    glm::mat4 model_model = glm::mat4(1.0f);
+    model_model = glm::translate(model_model, glm::vec3(-2.0f, 0.3f , 0.0f));
+    model_model = glm::rotate(model_model, (float)glm::radians(-90.0f), glm::vec3(1, 0, 0));
+    model_model = glm::scale(model_model, glm::vec3(0.0001));
+
+    modelShader.use();
+    modelShader.setMat4("model", model_model);
+    modelShader.setMat4("view", view);
+    modelShader.setMat4("projection", projection);
+    modelShader.setVec3("lightPosition", lightPosition);
+    modelShader.setVec3("sunLightColor", sunLightColor);
+    modelShader.setVec3("sunLightDirection", sunLightDirection);
+
+    //spotLight for model
+    modelShader.setFloat("spotLight.lightConst", lightConst);
+    modelShader.setFloat("spotLight.linearConst", linearConst);
+    modelShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    modelShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    modelShader.setVec3("spotLight.position", cameraPos);
+    modelShader.setVec3("spotLight.direction", cameraFront);
+    modelShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    modelShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    modelShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+    modelShader.setVec3("lightColor", lightColor);
+    modelShader.setVec3("viewPos", cameraPos);
+
+    modelShader.setVec3("dirLight.direction", sunLightDirection);
+    modelShader.setVec3("dirLight.color", sunLightColor);
+    ourModel.Draw(modelShader);
+}
+
+void generateRocks(Model rockModel){
+
+    srand(glfwGetTime()); // initialize random seed
+
+    for (unsigned int i = 0; i < amount; i++)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        // 1. translation: displace along circle with 'radius' in range [-offset, offset]
+        float angle = (float)i / (float)amount * 360.0f;
+        float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float x = sin(angle) * radius + displacement;
+        float z = cos(angle) * radius + displacement;
+        model = glm::translate(model, glm::vec3(x, -0.01, z));
+
+        // 2. scale: Scale between 0.01 and 0.10f
+        float scale = (rand() % 20) / 250.0f + 0.01;
+        model = glm::scale(model, glm::vec3(scale));
+
+        // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+        float rotAngle = (rand() % 360);
+        model = glm::rotate(model, rotAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        // 4. now add to list of matrices
+        modelMatrices[i] = model;
+    }
+
+    // configure instanced array
+    // -------------------------
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+
+    // set transformation matrices as an instance vertex attribute (with divisor 1)
+    // note: we're cheating a little by taking the, now publicly declared, VAO of the model's mesh(es) and adding new vertexAttribPointers
+    // normally you'd want to do this in a more organized fashion, but for learning purposes this will do.
+    // -----------------------------------------------------------------------------------------------------------------------------------
+    for (unsigned int i = 0; i < rockModel.meshes.size(); i++)
+    {
+        unsigned int VAO = rockModel.meshes[i].VAO;
+        glBindVertexArray(VAO);
+        // set attribute pointers for matrix (4 times vec4)
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    }
+}
+
+void renderRocks(shader rockShader, Model rockModel, glm::mat4 view, glm::mat4 projection) {
+
+    rockShader.use();
+
+    rockShader.setFloat("spotLight.lightConst", lightConst);
+    rockShader.setFloat("spotLight.linearConst", linearConst);
+    rockShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    rockShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    rockShader.setVec3("spotLight.position", cameraPos);
+    rockShader.setVec3("spotLight.direction", cameraFront);
+    rockShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    rockShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    rockShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+    rockShader.setVec3("lightColor", lightColor);
+    rockShader.setVec3("viewPos", cameraPos);
+
+    rockShader.setMat4("projection", projection);
+    rockShader.setMat4("view", view);
+    rockShader.setVec3("dirLight.direction", sunLightDirection);
+    rockShader.setVec3("dirLight.color", sunLightColor);
+    rockShader.setVec3("viewPos", cameraPos);
+    rockShader.setInt("texture_diffuse1", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, rockModel.textures_loaded[0].id); // note: we also made the textures_loaded vector public (instead of private) from the model class.
+    for (unsigned int i = 0; i < rockModel.meshes.size(); i++)
+    {
+        glBindVertexArray(rockModel.meshes[i].VAO);
+        glDrawElementsInstanced(GL_TRIANGLES, rockModel.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount);
+        glBindVertexArray(0);
+    }
+}
+
+void renderPyramid(Shader pyramidShader, Texture2D pyramidTexture, unsigned VAO, glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
+    //Set matrices for pyramid
+    pyramidShader.use();
+    pyramidShader.setMat4("model", model);
+    pyramidShader.setMat4("view", view);
+    pyramidShader.setMat4("projection", projection);
+
+    //viewPos
+    pyramidShader.setVec3("viewPos", cameraPos);
+
+    //spotLight specification
+    pyramidShader.setFloat("spotLight.lightConst", lightConst);
+    pyramidShader.setFloat("spotLight.linearConst", linearConst);
+    pyramidShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    pyramidShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    pyramidShader.setVec3("spotLight.position", cameraPos);
+    pyramidShader.setVec3("spotLight.direction", cameraFront);
+    pyramidShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    pyramidShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    pyramidShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+
+//        //sunLight specification
+    pyramidShader.setVec3("dirLight.direction", sunLightDirection);
+    pyramidShader.setVec3("dirLight.color", sunLightColor);
+//
+//        //bug1 specification
+    pyramidShader.setFloat("pointLight.lightConst", lightConst);
+    pyramidShader.setFloat("pointLight.linearConst", linearConst);
+    pyramidShader.setFloat("pointLight.quadraticConst", quadraticConst);
+    pyramidShader.setVec3("pointLight.position", lightPosition);
+    pyramidShader.setVec3("pointLight.color", lightColor);
+
+    //pyramid texture
+    pyramidShader.setInt("texture_pyramid", 0);
+    pyramidTexture.activate(GL_TEXTURE0);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 12);
+
+    glBindVertexArray(0);
+}
+
+void renderGround(Shader groundShader, Texture2D groundTexture, std::string texUniformName ,unsigned int VAO, glm::mat4 view,
+                  glm::mat4 projection) {
+
+    glm::mat4 model = glm::mat4(1.0f);
+
+    groundShader.use();
+    groundShader.setMat4("model", model);
+    groundShader.setMat4("view", view);
+    groundShader.setMat4("projection", projection);
+
+    //viewPos
+    groundShader.setVec3("viewPos", cameraPos);
+
+    //sun light (directional light)
+    groundShader.setVec3("dirLight.direction", sunLightDirection);
+    groundShader.setVec3("dirLight.color", sunLightColor);
+
+    //bug light (point light)
+    groundShader.setFloat("pointLight.lightConst", lightConst);
+    groundShader.setFloat("pointLight.linearConst", linearConst);
+    groundShader.setFloat("pointLight.quadraticConst", quadraticConst);
+    groundShader.setVec3("pointLight.position", lightPosition);
+    groundShader.setVec3("pointLight.color", lightColor);
+
+    //spotlight
+    groundShader.setFloat("spotLight.lightConst", lightConst);
+    groundShader.setFloat("spotLight.linearConst", linearConst);
+    groundShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    groundShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    groundShader.setVec3("spotLight.position", cameraPos);
+    groundShader.setVec3("spotLight.direction", cameraFront);
+    groundShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    groundShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    groundShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+
+    // texture activation
+    groundShader.setInt(texUniformName, 0);
+    groundTexture.activate(GL_TEXTURE0);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+}
+
+void renderFirefly(Shader fireflyShader, unsigned VAO, glm::mat4 view, glm::mat4 projection) {
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, lightPosition);
+    model = glm::scale(model, glm::vec3(0.04f));
+
+    fireflyShader.use();
+
+    fireflyShader.setMat4("model", model);
+    fireflyShader.setMat4("view", view);
+    fireflyShader.setMat4("projection", projection);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+}
+
+void renderBeams(Shader obeliskShader, unsigned VAO, glm::mat4 view, glm::mat4 projection) {
+    obeliskShader.use();
+
+    //sun light (directional light)
+    obeliskShader.setVec3("dirLight.direction", sunLightDirection);
+    obeliskShader.setVec3("dirLight.color", sunLightColor);
+
+    //bug light (point light)
+    obeliskShader.setFloat("pointLight.lightConst", lightConst);
+    obeliskShader.setFloat("pointLight.linearConst", linearConst);
+    obeliskShader.setFloat("pointLight.quadraticConst", quadraticConst);
+    obeliskShader.setVec3("pointLight.position", lightPosition);
+    obeliskShader.setVec3("pointLight.color", lightColor);
+
+    //spotlight
+    obeliskShader.setFloat("spotLight.lightConst", lightConst);
+    obeliskShader.setFloat("spotLight.linearConst", linearConst);
+    obeliskShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    obeliskShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    obeliskShader.setVec3("spotLight.position", cameraPos);
+    obeliskShader.setVec3("spotLight.direction", cameraFront);
+    obeliskShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    obeliskShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    obeliskShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+
+    obeliskShader.setVec3("material.ambient", glm::vec3(0.0215,	0.1745, 0.0215));
+    obeliskShader.setVec3("material.diffuse", glm::vec3(0.07568, 0.61424, 0.07568));
+    obeliskShader.setVec3("material.specular", glm::vec3(0.633, 0.727811, 0.633));
+    obeliskShader.setFloat("material.shininess", 0.6);
+
+    obeliskShader.setVec3("viewPos", lightPosition);
+
+    glBindVertexArray(VAO);
+
+    for (int i = 0; i < 12 && beams; i++) {
+
+        float radius = 7.0f;
+        glm::mat4 model_obelisk = glm::mat4(1.0f);
+        float angle = 30.0f;
+
+        model_obelisk = glm::translate(model_obelisk, glm::vec3(radius * glm::cos(glm::radians(i*angle)) + 5.0f, 0.0, radius * glm::sin(glm::radians(i*angle))-5.0f));
+        model_obelisk = glm::scale(model_obelisk, glm::vec3(0.02f, 5000.0f,  0.02f));
+
+        obeliskShader.setMat4("model", model_obelisk);
+        obeliskShader.setMat4("view", view);
+        obeliskShader.setMat4("projection", projection);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+    glBindVertexArray(0);
+}
+
+void renderBoxes(Shader boxShader, unsigned VAO, Texture2D woodTexture, Texture2D metalTexture, glm::mat4 view, glm::mat4 projection) {
+    //model
+    glm::mat4 model_cube = glm::mat4(1.0f);
+    model_cube = glm::translate(model_cube, glm::vec3(1.3, 0.12, -2.3));
+    model_cube = glm::scale(model_cube, glm::vec3(0.2f));
+
+    renderBox(boxShader, VAO, woodTexture, "material.diffuse", metalTexture, "material.specular", model_cube, view, projection);
+
+    model_cube = glm::translate(model_cube, glm::vec3(1.1 , 0.0, 1.2));
+    model_cube = glm::rotate(model_cube, glm::radians(29.0f), glm::vec3(0.0, 1.0, 0.0));
+
+    renderBox(boxShader, VAO, woodTexture, "material.diffuse", metalTexture, "material.specular", model_cube, view, projection);
+
+    model_cube = glm::translate(model_cube, glm::vec3(0.1 , 1.0, -0.15));
+    model_cube = glm::rotate(model_cube, glm::radians(18.0f), glm::vec3(0.0, 1.0, 0.0));
+    boxShader.setMat4("model", model_cube);
+    boxShader.setMat4("view", view);
+    boxShader.setMat4("projection", projection);
+
+    renderBox(boxShader, VAO, woodTexture, "material.diffuse", metalTexture, "material.specular", model_cube, view, projection);
+}
+
+void renderBox(Shader boxShader, unsigned VAO, Texture2D woodTexture, std::string woodTexUniformName,
+               Texture2D metalTexture, std::string metalTexUniformName, glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
+    boxShader.use();
+    boxShader.setMat4("model", model);
+    boxShader.setMat4("view", view);
+    boxShader.setMat4("projection", projection);
+    //viewPos
+    boxShader.setVec3("viewPos", cameraPos);
+
+    //sun light (directional light)
+    boxShader.setVec3("dirLight.direction", sunLightDirection);
+    boxShader.setVec3("dirLight.color", sunLightColor);
+
+    //bug light (point light)
+    boxShader.setFloat("pointLight.lightConst", lightConst);
+    boxShader.setFloat("pointLight.linearConst", linearConst);
+    boxShader.setFloat("pointLight.quadraticConst", quadraticConst);
+    boxShader.setVec3("pointLight.position", lightPosition);
+    boxShader.setVec3("pointLight.color", lightColor);
+
+    //spotlight
+    boxShader.setFloat("spotLight.lightConst", lightConst);
+    boxShader.setFloat("spotLight.linearConst", linearConst);
+    boxShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    boxShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    boxShader.setVec3("spotLight.position", cameraPos);
+    boxShader.setVec3("spotLight.direction", cameraFront);
+    boxShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    boxShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    boxShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+
+    boxShader.setFloat("material.shininess", 64.0f);
+
+    boxShader.setInt(woodTexUniformName, 0);
+    woodTexture.activate(GL_TEXTURE0);
+
+    boxShader.setInt(metalTexUniformName, 1);
+    metalTexture.activate(GL_TEXTURE1);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
 }

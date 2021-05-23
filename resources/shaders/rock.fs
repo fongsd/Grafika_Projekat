@@ -23,31 +23,36 @@ struct SpotLight{
     float outerCutOff;
 };
 
-
-
 in vec3 fragPos;
 uniform DirLight dirLight;
 uniform SpotLight spotLight;
 
-vec3 calcDifLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 normals);
+vec3 calcDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 normals);
 vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 normals);
 void main()
 {
     vec3 normals = normalize(Normal);
 
-    vec3 diffuse = calcDifLight(dirLight, fragPos, viewPos, normals);
+    vec3 diffuse = calcDirLight(dirLight, fragPos, viewPos, normals);
     vec3 spotLightVec = calculateSpotLight(spotLight, fragPos, viewPos, normals);
     FragColor = vec4(diffuse + spotLightVec, 1.0f) * texture(texture_diffuse1, TexCoords);
 }
 
-vec3 calcDifLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 normals)
+vec3 calcDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 normals)
 {
-    vec3 lightDir = normalize(dirLight.direction - fragPos);
+    //light beam direction for each fragment
+    vec3 lightDir = normalize(dirLight.direction);
 
-    float diffuse = max(dot(lightDir, normals), 0.0);
-    vec3 diffuseVec = diffuse * dirLight.color;
-    return diffuseVec;
+    //ambient
+    float ambientStrength = 0.2;
+    vec3 ambient = ambientStrength * dirLight.color;
 
+    //diffuse
+    float diff = max(dot(-lightDir, normals),0.0);
+    vec3 diffuse = diff * dirLight.color;
+
+    vec3 dir = ambient + diffuse;
+    return dir;
 }
 
 vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 normals){
@@ -55,7 +60,7 @@ vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 no
     //light beam direction for each fragment
     vec3 lightDir = normalize(fragPos - spotLight.position);
 
-    //attenuation calclutation
+    //attenuation calcultation
     float distance = length(fragPos - spotLight.position); //not using lightDir because lightDir is normalized
     float attenuation = 1.0 / (spotLight.lightConst + spotLight.linearConst * distance + spotLight.quadraticConst * (distance*distance));
 
