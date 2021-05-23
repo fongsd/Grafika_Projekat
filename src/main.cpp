@@ -79,7 +79,7 @@ float fov = 45.0f;
 GLsizei SHADOW_WIDTH = 1024;
 GLsizei SHADOW_HEIGHT = 1024;
 
-void renderTruck(shader modelShader, Model ourModel, glm::mat4 view, glm::mat4 projection);
+void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection);
 void renderRocks(shader rockShader, Model rockModel, glm::mat4 view, glm::mat4 projection);
 void generateRocks(Model rockModel);
 void renderPyramid(Shader pyramidShader, Texture2D pyramidTexture, unsigned VAO, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
@@ -279,31 +279,31 @@ int main() {
 
     //Create shaders
     Shader pyramidShader = Shader(FileSystem::getPath("resources/shaders/pyramid.vert"), FileSystem::getPath("/resources/shaders/pyramid.frag"));
-    Shader ground_shader = Shader (FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
+    Shader groundShader = Shader (FileSystem::getPath("resources/shaders/ground_shader.vert"),FileSystem::getPath("resources/shaders/ground_shader.frag"));
 
 //    Pyramid texture
-    Texture2D texture_pyramid = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
-    texture_pyramid.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
-    texture_pyramid.reflect_vertically();
-    texture_pyramid.free_data();
+    Texture2D pyramidTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
+    pyramidTexture.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
+    pyramidTexture.reflect_vertically();
+    pyramidTexture.free_data();
 
 //    Sand texture
-    Texture2D sand_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
-    sand_texture.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
-    sand_texture.reflect_vertically();
-    sand_texture.free_data();
+    Texture2D groundTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
+    groundTexture.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
+    groundTexture.reflect_vertically();
+    groundTexture.free_data();
 
 //    wood texture
-    Texture2D wood_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-    wood_texture.load(FileSystem::getPath("resources/textures/container2.png"), GL_RGBA);
-    wood_texture.reflect_vertically();
-    wood_texture.free_data();
+    Texture2D woodTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    woodTexture.load(FileSystem::getPath("resources/textures/container2.png"), GL_RGBA);
+    woodTexture.reflect_vertically();
+    woodTexture.free_data();
 
     // metal texture
-    Texture2D metal_texture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-    metal_texture.load(FileSystem::getPath("resources/textures/container2_specular.png"), GL_RGBA);
-    metal_texture.reflect_vertically();
-    metal_texture.free_data();
+    Texture2D metalTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    metalTexture.load(FileSystem::getPath("resources/textures/container2_specular.png"), GL_RGBA);
+    metalTexture.reflect_vertically();
+    metalTexture.free_data();
 
     //Initial color of background
 
@@ -311,12 +311,12 @@ int main() {
     stbi_set_flip_vertically_on_load(true);
     glEnable(GL_DEPTH_TEST);
 
-    shader modelShader("resources/shaders/model_loading.vs",
+    shader truckShader("resources/shaders/model_loading.vs",
                        "resources/shaders/model_loading.fs");
 
-//    modelShader.use();
+//    truckShader.use();
 
-    Model ourModel(FileSystem::getPath("resources/objects/truck/13630_open3dmodel/open3dmodel.com/Model_C0901061/kraz.obj"));
+    Model truckModel(FileSystem::getPath("resources/objects/truck/13630_open3dmodel/open3dmodel.com/Model_C0901061/kraz.obj"));
 
     //rock loading
 
@@ -333,6 +333,10 @@ int main() {
         initLoop();
         processInput(window);
 
+        //view and projection matrices
+        glm::mat4 view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 1000.0f);
+
         //framebuffer for depth mapping
         unsigned int depthMapFBO;
         glGenFramebuffers(1, &depthMapFBO);
@@ -344,23 +348,18 @@ int main() {
         //attach framebuffer
         depthMap.attach_framebuffer(depthMapFBO);
 
-        //view and projection matrices
-        glm::mat4 view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
-        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 1000.0f);
-
         //render scene
-        renderScene(pyramidShader, texture_pyramid,
-                    ground_shader, sand_texture, VAOs,
+        renderScene(pyramidShader, pyramidTexture,
+                    groundShader, groundTexture, VAOs,
                     fireflyShader, cubeVAO,
-                    boxShader, wood_texture, metal_texture,
-                    obeliskShader, modelShader, ourModel,
+                    boxShader, woodTexture, metalTexture,
+                    obeliskShader, truckShader, truckModel,
                     rockShader, rockModel,
                     view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
 
     glfwTerminate();
     return 0;
@@ -548,37 +547,37 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         fov = 45.0f;
 }
 
-void renderTruck(shader modelShader, Model ourModel, glm::mat4 view, glm::mat4 projection){
+void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection){
     //Model
     glm::mat4 model_model = glm::mat4(1.0f);
     model_model = glm::translate(model_model, glm::vec3(-2.0f, 0.3f , 0.0f));
     model_model = glm::rotate(model_model, (float)glm::radians(-90.0f), glm::vec3(1, 0, 0));
     model_model = glm::scale(model_model, glm::vec3(0.0001));
 
-    modelShader.use();
-    modelShader.setMat4("model", model_model);
-    modelShader.setMat4("view", view);
-    modelShader.setMat4("projection", projection);
-    modelShader.setVec3("lightPosition", lightPosition);
-    modelShader.setVec3("sunLightColor", sunLightColor);
-    modelShader.setVec3("sunLightDirection", sunLightDirection);
+    truckShader.use();
+    truckShader.setMat4("model", model_model);
+    truckShader.setMat4("view", view);
+    truckShader.setMat4("projection", projection);
+    truckShader.setVec3("lightPosition", lightPosition);
+    truckShader.setVec3("sunLightColor", sunLightColor);
+    truckShader.setVec3("sunLightDirection", sunLightDirection);
 
     //spotLight for model
-    modelShader.setFloat("spotLight.lightConst", lightConst);
-    modelShader.setFloat("spotLight.linearConst", linearConst);
-    modelShader.setFloat("spotLight.quadraticConst", quadraticConst);
-    modelShader.setInt("spotLight.spotLightFlag", spotLightFlag);
-    modelShader.setVec3("spotLight.position", cameraPos);
-    modelShader.setVec3("spotLight.direction", cameraFront);
-    modelShader.setVec3("spotLight.color", glm::vec3 (1.0f));
-    modelShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-    modelShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-    modelShader.setVec3("lightColor", lightColor);
-    modelShader.setVec3("viewPos", cameraPos);
+    truckShader.setFloat("spotLight.lightConst", lightConst);
+    truckShader.setFloat("spotLight.linearConst", linearConst);
+    truckShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    truckShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    truckShader.setVec3("spotLight.position", cameraPos);
+    truckShader.setVec3("spotLight.direction", cameraFront);
+    truckShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    truckShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    truckShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+    truckShader.setVec3("lightColor", lightColor);
+    truckShader.setVec3("viewPos", cameraPos);
 
-    modelShader.setVec3("dirLight.direction", sunLightDirection);
-    modelShader.setVec3("dirLight.color", sunLightColor);
-    ourModel.Draw(modelShader);
+    truckShader.setVec3("dirLight.direction", sunLightDirection);
+    truckShader.setVec3("dirLight.color", sunLightColor);
+    truckModel.Draw(truckShader);
 }
 
 void generateRocks(Model rockModel){
