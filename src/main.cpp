@@ -22,15 +22,13 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 const unsigned int SCR_WIDTH = 1980;
 const unsigned int SCR_HEIGHT = 1024;
 
-//TODO: implementirati sun light za kutiju
-
-//Vectors of camera
-glm::vec3 lightColor = glm::vec3(0.2f, 0.4f, 0.4f);
+//firefly lightt
+glm::vec3 lightColor = glm::vec3(0.7f);
 glm::vec3 lightPosition = glm::vec3(2.0f ,2.0f,  -7.0f);
 
 //sunlight
 glm::vec3 sunLightDirection = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(-1.0f, -2.0f, -1.0f, 1.0f));
-glm::vec3 sunLightColor = glm::vec3(0.8f);
+glm::vec3 sunLightColor = glm::vec3(0.3f);
 
 //sky color
 glm::vec3 skyColor = glm::vec3(0.2, 0.5, 0.4);
@@ -74,10 +72,6 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float fov = 45.0f;
 // -------------------------------------------------------
-
-
-GLsizei SHADOW_WIDTH = 1024;
-GLsizei SHADOW_HEIGHT = 1024;
 
 void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection);
 void renderRocks(shader rockShader, Model rockModel, glm::mat4 view, glm::mat4 projection);
@@ -131,7 +125,7 @@ int main() {
     glfwSetKeyCallback(window, key_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
-//
+
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -283,25 +277,25 @@ int main() {
 
 //    Pyramid texture
     Texture2D pyramidTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
-    pyramidTexture.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), GL_RGB);
+    pyramidTexture.load(FileSystem::getPath("resources/textures/pyramid_2.jpg"), true);
     pyramidTexture.reflect_vertically();
     pyramidTexture.free_data();
 
 //    Sand texture
     Texture2D groundTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST);
-    groundTexture.load(FileSystem::getPath("/resources/textures/sand.jpg"), GL_RGB);
+    groundTexture.load(FileSystem::getPath("/resources/textures/sand.jpg"), true);
     groundTexture.reflect_vertically();
     groundTexture.free_data();
 
 //    wood texture
     Texture2D woodTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-    woodTexture.load(FileSystem::getPath("resources/textures/container2.png"), GL_RGBA);
+    woodTexture.load(FileSystem::getPath("resources/textures/container2.png"), true);
     woodTexture.reflect_vertically();
     woodTexture.free_data();
 
     // metal texture
     Texture2D metalTexture = Texture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-    metalTexture.load(FileSystem::getPath("resources/textures/container2_specular.png"), GL_RGBA);
+    metalTexture.load(FileSystem::getPath("resources/textures/container2_specular.png"), false);
     metalTexture.reflect_vertically();
     metalTexture.free_data();
 
@@ -336,17 +330,6 @@ int main() {
         //view and projection matrices
         glm::mat4 view = glm::lookAt(cameraPos , cameraFront + cameraPos, cameraUp);
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 1000.0f);
-
-        //framebuffer for depth mapping
-        unsigned int depthMapFBO;
-        glGenFramebuffers(1, &depthMapFBO);
-
-        //texture2D for depth mapping
-        Texture2D depthMap = Texture2D(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST);
-        depthMap.specify_texture_image(GL_TEXTURE_2D, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, GL_DEPTH_COMPONENT, GL_FLOAT);
-
-        //attach framebuffer
-        depthMap.attach_framebuffer(depthMapFBO);
 
         //render scene
         renderScene(pyramidShader, pyramidTexture,
@@ -400,7 +383,7 @@ void initLoop() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     float radius = 4.0f;
-    lightPosition = glm::vec3(cos(glfwGetTime())*radius  ,0.5,  sin(glfwGetTime())*radius);
+    lightPosition = glm::vec3(cos(glfwGetTime())*radius  ,1.0,  sin(glfwGetTime())*radius);
 
     //frame-time logic
     float current_frame = glfwGetTime();
@@ -879,7 +862,7 @@ void renderBox(Shader boxShader, unsigned VAO, Texture2D woodTexture, std::strin
     boxShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
     boxShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
 
-    boxShader.setFloat("material.shininess", 64.0f);
+    boxShader.setFloat("material.shininess", 4.0f);
 
     boxShader.setInt(woodTexUniformName, 0);
     woodTexture.activate(GL_TEXTURE0);

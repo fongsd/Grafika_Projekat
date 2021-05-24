@@ -26,39 +26,32 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
     }
 
-    void specify_texture_image(GLenum target,
-                               GLint internalFormat,
-                               GLsizei width,
-                               GLsizei height,
-                               GLenum format,
-                               GLenum type,
-                               GLint level = 0,
-                               GLint border = 0,
-                               const GLvoid * data = NULL){
-        glTexImage2D(target, level, GL_DEPTH_COMPONENT, width, height, border, GL_DEPTH_COMPONENT, GL_FLOAT, data);
-    }
-
-    void attach_framebuffer(unsigned int framebuffer){
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_tex, 0);
-        //We need to explicitly tell OpenGL that we won't render any color data
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    };
-
     void reflect_vertically(){
         stbi_set_flip_vertically_on_load(true);
     }
 
-    void load(std::string path_to_img, GLenum rgb){
+    void load(std::string path_to_img, bool gamma_correction){
         int width, height, n_channels;
 
         m_data = stbi_load(path_to_img.c_str(), &width, &height, &n_channels, 0);
 
+        GLenum internalFormat, dataFormat;
+        if(n_channels == 1){
+            internalFormat = dataFormat = GL_RED;
+        }
+
+        else if(n_channels == 3){
+            internalFormat = gamma_correction ? GL_SRGB : GL_RGB;
+            dataFormat = GL_RGB;
+        }
+
+        else if(n_channels == 4){
+            internalFormat = gamma_correction ? GL_SRGB_ALPHA : GL_RGBA;
+            dataFormat = GL_RGBA;
+        }
+
         if(m_data){
-            glTexImage2D(GL_TEXTURE_2D, 0, rgb, width, height, 0, rgb, GL_UNSIGNED_BYTE, m_data);
+            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, m_data);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else{

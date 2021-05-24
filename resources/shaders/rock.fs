@@ -44,7 +44,7 @@ vec3 calcDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 normals)
     vec3 lightDir = normalize(dirLight.direction);
 
     //ambient
-    float ambientStrength = 0.2;
+    float ambientStrength = 0.8;
     vec3 ambient = ambientStrength * dirLight.color;
 
     //diffuse
@@ -70,8 +70,8 @@ vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 no
     diffuse *= attenuation;
 
     //specular
-    float shiness = 32;
-    float specularStrength = 0.5;
+    float shiness = 32.0;
+    float specularStrength = 0.1;
 
     vec3 reflectDir = reflect(-lightDir, normals);
     vec3 viewDir = normalize(fragPos - viewPos);
@@ -86,12 +86,11 @@ vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 no
     float intensity = clamp((cosTheta - spotLight.outerCutOff)/epsilon, 0.0, 1.0);
     float spotDistance = length(spotLight.position - fragPos);
     float spotAttenuation = 1.0 / (spotLight.lightConst + spotLight.linearConst * spotDistance + spotLight.quadraticConst * (spotDistance*spotDistance));
-    vec3 flash = spotLight.color * attenuation * intensity;
 
     vec3 spot = vec3(0.0, 0.0, 0.0);
 
     if(spotLight.spotLightFlag == 1 && cosTheta > spotLight.outerCutOff){
-        spot = diffuse + specular + flash;
+        spot = (diffuse + specular) * intensity;
     }
 
     return spot;

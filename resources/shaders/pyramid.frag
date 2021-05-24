@@ -56,7 +56,11 @@ void main()
     result += calculatePointLight(pointLight, fragPos, viewPos, norm);
     result += calculateSpotLight(spotLight, fragPos, viewPos, norm);
 
-    fragColor = vec4(result, 1.0) * texture(texture_pyramid, texCords);
+    //gamma correction
+    vec3 color = vec3(vec4(result, 1.0) * texture(texture_pyramid, texCords));
+    color = pow(color,vec3(1.0/2.2));
+
+    fragColor = vec4(color, 1.0);
 }
 
 vec3 calculateDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 norm){
