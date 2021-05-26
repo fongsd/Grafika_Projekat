@@ -310,7 +310,7 @@ int main() {
 
 //    truckShader.use();
 
-    Model truckModel(FileSystem::getPath("resources/objects/truck/13630_open3dmodel/open3dmodel.com/Model_C0901061/kraz.obj"));
+    Model truckModel(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
 
     //rock loading
 
@@ -533,17 +533,15 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection){
     //Model
     glm::mat4 model_model = glm::mat4(1.0f);
-    model_model = glm::translate(model_model, glm::vec3(-2.0f, 0.3f , 0.0f));
-    model_model = glm::rotate(model_model, (float)glm::radians(-90.0f), glm::vec3(1, 0, 0));
-    model_model = glm::scale(model_model, glm::vec3(0.0001));
+    model_model = glm::translate(model_model, glm::vec3(1.4, 0.1, -1.95));
+    model_model = glm::rotate(model_model, (float)glm::radians(-25.0f), glm::vec3(1.0, 0.0, 1.0));
+    model_model = glm::rotate(model_model, (float)glm::radians(-55.0f), glm::vec3(0.0, 1.0, 0.0));
+    model_model = glm::scale(model_model, glm::vec3(0.05));
 
     truckShader.use();
     truckShader.setMat4("model", model_model);
     truckShader.setMat4("view", view);
     truckShader.setMat4("projection", projection);
-    truckShader.setVec3("lightPosition", lightPosition);
-    truckShader.setVec3("sunLightColor", sunLightColor);
-    truckShader.setVec3("sunLightDirection", sunLightDirection);
 
     //spotLight for model
     truckShader.setFloat("spotLight.lightConst", lightConst);
@@ -555,9 +553,17 @@ void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4
     truckShader.setVec3("spotLight.color", glm::vec3 (1.0f));
     truckShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
     truckShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
-    truckShader.setVec3("lightColor", lightColor);
+
+    //firefly
+    truckShader.setFloat("pointLight.lightConst", lightConst);
+    truckShader.setFloat("pointLight.linearConst", linearConst);
+    truckShader.setFloat("pointLight.quadraticConst", quadraticConst);
+    truckShader.setVec3("pointLight.position", lightPosition);
+    truckShader.setVec3("pointLight.color", lightColor);
+
     truckShader.setVec3("viewPos", cameraPos);
 
+    //sun light
     truckShader.setVec3("dirLight.direction", sunLightDirection);
     truckShader.setVec3("dirLight.color", sunLightColor);
     truckModel.Draw(truckShader);
