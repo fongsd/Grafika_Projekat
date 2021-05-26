@@ -33,9 +33,14 @@ void main()
 {
     vec3 normals = normalize(Normal);
 
-    vec3 diffuse = calcDirLight(dirLight, fragPos, viewPos, normals);
-    vec3 spotLightVec = calculateSpotLight(spotLight, fragPos, viewPos, normals);
-    FragColor = vec4(diffuse + spotLightVec, 1.0f) * texture(texture_diffuse1, TexCoords);
+    vec3 result = vec3(0.0);
+
+    result += calcDirLight(dirLight, fragPos, viewPos, normals);
+    result += calculateSpotLight(spotLight, fragPos, viewPos, normals);
+
+    result = pow(result, vec3(1.0/2.2));
+
+    FragColor = vec4(result, 1.0) * texture(texture_diffuse1, TexCoords);
 }
 
 vec3 calcDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 normals)
@@ -84,8 +89,6 @@ vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 no
     float cosTheta = dot(lightDir, normalize(spotLight.direction));
     float epsilon = spotLight.cutOff - spotLight.outerCutOff;
     float intensity = clamp((cosTheta - spotLight.outerCutOff)/epsilon, 0.0, 1.0);
-    float spotDistance = length(spotLight.position - fragPos);
-    float spotAttenuation = 1.0 / (spotLight.lightConst + spotLight.linearConst * spotDistance + spotLight.quadraticConst * (spotDistance*spotDistance));
 
     vec3 spot = vec3(0.0, 0.0, 0.0);
 

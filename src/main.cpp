@@ -27,8 +27,8 @@ glm::vec3 lightColor = glm::vec3(0.7f);
 glm::vec3 lightPosition = glm::vec3(2.0f ,2.0f,  -7.0f);
 
 //sunlight
-glm::vec3 sunLightDirection = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(-1.0f, -2.0f, -1.0f, 1.0f));
-glm::vec3 sunLightColor = glm::vec3(0.3f);
+glm::vec3 sunLightDirection = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(-1.0f, -2.0f, -1.0f, 1.0f));
+glm::vec3 sunLightColor = glm::vec3(0.2f);
 
 //sky color
 glm::vec3 skyColor = glm::vec3(0.2, 0.5, 0.4);

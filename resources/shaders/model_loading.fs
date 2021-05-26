@@ -56,7 +56,9 @@ void main()
     result += calculatePointLight(pointLight, fragPos, viewPos, norm);
     result += calculateSpotLight(spotLight, fragPos, viewPos, norm);
 
+    //Strange behaviour of gamma correction :|
     //result = pow(result,vec3(1.0/2.2));
+
     fragColor = vec4(result, 1.0f);
 }
 
@@ -82,7 +84,7 @@ vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 no
     vec3 viewDir = normalize(fragPos - viewPos);
 
     float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shiness);
-    vec3 specular = specularStrength * spotLight.color * spec * texture(specular_texture1, texCords).rgb;
+    vec3 specular = specularStrength * spotLight.color * spec * texture(specular_texture1, texCords).rrr;
     specular *= attenuation;
 
     //spot
@@ -123,7 +125,7 @@ vec3 calculatePointLight(PointLight pointLight, vec3 fragPos, vec3 viewPos, vec3
         vec3 viewDir = normalize(fragPos - viewPos);
         float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shininess);
         float specularStrength = 0.5;
-        vec3 specular = specularStrength * dirLight.color * spec * texture(specular_texture1, texCords).rgb;
+        vec3 specular = specularStrength * dirLight.color * spec * texture(specular_texture1, texCords).rrr;
         specular *= attenuation;
 
         vec3 point = ambient + diffuse + specular;
@@ -148,7 +150,7 @@ vec3 calculateDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 norm)
     vec3 viewDir = normalize(fragPos - viewPos);
     float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shinnes);
     float specularStrength = 0.5;
-    vec3 specular = specularStrength * dirLight.color * spec * texture(specular_texture1, texCords).rgb;
+    vec3 specular = specularStrength * dirLight.color * spec * texture(specular_texture1, texCords).rrr;
 
     vec3 dir = ambient + diffuse + specular;
     return dir;
