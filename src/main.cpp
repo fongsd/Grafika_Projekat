@@ -24,7 +24,7 @@ const unsigned int SCR_HEIGHT = 1024;
 
 //firefly lightt
 glm::vec3 lightColor = glm::vec3(0.7f);
-glm::vec3 lightPosition = glm::vec3(2.0f ,2.0f,  -7.0f);
+glm::vec3 lightPosition = glm::vec3(1.0f ,0.5f,  -1.0f);
 
 //sunlight
 glm::vec3 sunLightDirection = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(-1.0f, -2.0f, -1.0f, 1.0f));
@@ -382,8 +382,9 @@ void initLoop() {
     glClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    float radius = 4.0f;
-    lightPosition = glm::vec3(cos(glfwGetTime())*radius  ,1.0,  sin(glfwGetTime())*radius);
+    float radius = 3.0f;
+    lightPosition = glm::vec3(cos(glfwGetTime())*radius  ,0.5,  sin(glfwGetTime())*radius);
+
 
     //frame-time logic
     float current_frame = glfwGetTime();
@@ -868,7 +869,7 @@ void renderBox(Shader boxShader, unsigned VAO, Texture2D woodTexture, std::strin
     boxShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
     boxShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
 
-    boxShader.setFloat("material.shininess", 4.0f);
+    boxShader.setFloat("material.shininess", 16.0f);
 
     boxShader.setInt(woodTexUniformName, 0);
     woodTexture.activate(GL_TEXTURE0);

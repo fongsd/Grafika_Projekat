@@ -77,13 +77,13 @@ vec3 calculateSpotLight(SpotLight spotLight, vec3 fragPos, vec3 viewPos, vec3 no
     diffuse *= attenuation;
 
     //specular
-    float shiness = 32;
-    float specularStrength = 0.5;
+    float shininess = 32.0;
+    float specularStrength = 1.0;
 
     vec3 reflectDir = reflect(-lightDir, norm);
     vec3 viewDir = normalize(fragPos - viewPos);
 
-    float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shiness);
+    float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shininess);
     vec3 specular = specularStrength * spotLight.color * spec * texture(specular_texture1, texCords).rrr;
     specular *= attenuation;
 
@@ -110,7 +110,7 @@ vec3 calculatePointLight(PointLight pointLight, vec3 fragPos, vec3 viewPos, vec3
         float attenuation = 1.0 / (pointLight.lightConst + pointLight.linearConst * distance + pointLight.quadraticConst * (distance*distance));
 
         //ambient
-        float ambientStrength = 0.1;
+        float ambientStrength = 0.2;
         vec3 ambient = ambientStrength * pointLight.color * texture(diffuse_texture1, texCords).rgb;
         ambient *= attenuation;
 
@@ -120,11 +120,11 @@ vec3 calculatePointLight(PointLight pointLight, vec3 fragPos, vec3 viewPos, vec3
         diffuse *= attenuation;
 
         //specular
-        float shininess = 16;
+        float shininess = 32.0;
         vec3 reflectDir = reflect(lightDir, norm);
         vec3 viewDir = normalize(fragPos - viewPos);
         float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shininess);
-        float specularStrength = 0.5;
+        float specularStrength = 1.0;
         vec3 specular = specularStrength * dirLight.color * spec * texture(specular_texture1, texCords).rrr;
         specular *= attenuation;
 
@@ -145,11 +145,11 @@ vec3 calculateDirLight(DirLight dirLight, vec3 fragPos, vec3 viewPos, vec3 norm)
     vec3 diffuse = diff * dirLight.color * texture(diffuse_texture1, texCords).rgb;
 
     //specular
-    float shinnes = 16;
+    float shininess = 32.0;
     vec3 reflectDir = reflect(lightDir, norm);
     vec3 viewDir = normalize(fragPos - viewPos);
-    float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shinnes);
-    float specularStrength = 0.5;
+    float spec = pow(max(dot(-viewDir, reflectDir), 0.0), shininess);
+    float specularStrength = 1.0;
     vec3 specular = specularStrength * dirLight.color * spec * texture(specular_texture1, texCords).rrr;
 
     vec3 dir = ambient + diffuse + specular;
