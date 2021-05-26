@@ -33,6 +33,9 @@ glm::vec3 sunLightColor = glm::vec3(0.2f);
 //sky color
 glm::vec3 skyColor = glm::vec3(0.2, 0.5, 0.4);
 
+//cullface - press c to change
+bool cullFaceEnabled = true;
+
 //beams - press l to cast
 bool beams = false;
 
@@ -73,7 +76,6 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float fov = 45.0f;
 // -------------------------------------------------------
-
 
 
 void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection);
@@ -402,9 +404,13 @@ void renderPyramids(Shader pyramidShader, unsigned VAO, Texture2D pyramidTexture
     modelSuperPyramid = glm::scale(modelSuperPyramid, glm::vec3(300.0f));
 
     //CULL FACE enabled for small pyrmid
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    bool flag = false;
+    if(cullFaceEnabled){
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
+        flag = true;
+    }
 
     //render small pyramid
     renderPyramid(pyramidShader, pyramidTexture, VAO, modelSuperPyramid, view, projection);
@@ -417,7 +423,9 @@ void renderPyramids(Shader pyramidShader, unsigned VAO, Texture2D pyramidTexture
     renderPyramid(pyramidShader, pyramidTexture, VAO, modelSmallPyramid, view, projection);
 
     //DISABLING CULL FACE for small pyramid and super pyramid
-    glDisable(GL_CULL_FACE);
+    if(flag){
+        glDisable(GL_CULL_FACE);
+    }
 
     //render big pyramid
     glm::mat4 modelBigPyramid = glm::mat4(1.0f);
@@ -471,30 +479,11 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
     if(key == GLFW_KEY_F && action == GLFW_PRESS){
-        if(spotLightFlag == 1){
-            spotLightFlag = 0;
-        }
-        else{
-            spotLightFlag = 1;
-        }
-    }
-
-    if(key == GLFW_KEY_SPACE && action == GLFW_PRESS){
-        if(stop == false){
-            stop = true;
-        }
-        else{
-            stop = false;
-        }
+        spotLightFlag = 1 - spotLightFlag;
     }
 
     if(key == GLFW_KEY_L && action == GLFW_PRESS){
-        if(beams == false){
-            beams = true;
-        }
-        else{
-            beams = false;
-        }
+        beams = !beams;
     }
 
     if(key == GLFW_KEY_UP && action == GLFW_PRESS){
@@ -513,6 +502,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         else{
             cameraSpeedParameter -= 10.0;
         }
+    }
+
+    if(key == GLFW_KEY_C && action == GLFW_PRESS){
+        cullFaceEnabled = !cullFaceEnabled;
     }
 
 }
