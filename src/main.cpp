@@ -47,6 +47,7 @@ unsigned int buffer;
 glm::vec3 cameraPos = glm::vec3(0.0, 1.0, 4.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
+float cameraSpeedParameter = 10.0;
 
 //light distance constants
 float lightConst = 1.0f;
@@ -72,6 +73,8 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float fov = 45.0f;
 // -------------------------------------------------------
+
+
 
 void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection);
 void renderRocks(shader rockShader, Model rockModel, glm::mat4 view, glm::mat4 projection);
@@ -393,10 +396,10 @@ void initLoop() {
 }
 
 void renderPyramids(Shader pyramidShader, unsigned VAO, Texture2D pyramidTexture, glm::mat4 view, glm::mat4 projection) {
-    // Create model matrix for small pyramid
-    glm::mat4 modelSmallPyramid = glm::mat4(1.0f);
-    modelSmallPyramid = glm::translate(modelSmallPyramid, glm::vec3(2.0f, 0.0f, 0.0f));
-    modelSmallPyramid = glm::scale(modelSmallPyramid, glm::vec3(2.0f, 2.0f, 2.0f));
+
+    // Create model matrix for super pyramid
+    glm::mat4 modelSuperPyramid = glm::mat4(1.0f);
+    modelSuperPyramid = glm::scale(modelSuperPyramid, glm::vec3(300.0f));
 
     //CULL FACE enabled for small pyrmid
     glEnable(GL_CULL_FACE);
@@ -404,9 +407,16 @@ void renderPyramids(Shader pyramidShader, unsigned VAO, Texture2D pyramidTexture
     glFrontFace(GL_CCW);
 
     //render small pyramid
+    renderPyramid(pyramidShader, pyramidTexture, VAO, modelSuperPyramid, view, projection);
+
+    // Create model matrix for small pyramid
+    glm::mat4 modelSmallPyramid = glm::mat4(1.0f);
+    modelSmallPyramid = glm::translate(modelSmallPyramid, glm::vec3(2.0f, 0.0f, 0.0f));
+    modelSmallPyramid = glm::scale(modelSmallPyramid, glm::vec3(2.0f, 2.0f, 2.0f));
+
     renderPyramid(pyramidShader, pyramidTexture, VAO, modelSmallPyramid, view, projection);
 
-    //DISABLING CULL FACE for small pyramid
+    //DISABLING CULL FACE for small pyramid and super pyramid
     glDisable(GL_CULL_FACE);
 
     //render big pyramid
@@ -424,7 +434,7 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    const float cameraSpeed = 10.0 * delta_time;
+    const float cameraSpeed = cameraSpeedParameter * delta_time;
 
     //da ne ide kamera ispod y ose
     if (cameraPos.y  < 0.3f)
@@ -484,6 +494,24 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         }
         else{
             beams = false;
+        }
+    }
+
+    if(key == GLFW_KEY_UP && action == GLFW_PRESS){
+        if(cameraSpeedParameter >= 100.0){
+            cameraSpeedParameter = 100.0;
+        }
+        else{
+            cameraSpeedParameter += 10.0;
+        }
+    }
+
+    if(key == GLFW_KEY_DOWN && action == GLFW_PRESS){
+        if(cameraSpeedParameter <= 5.0){
+            cameraSpeedParameter = 5.0;
+        }
+        else{
+            cameraSpeedParameter -= 10.0;
         }
     }
 
