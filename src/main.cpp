@@ -78,7 +78,7 @@ float fov = 45.0f;
 // -------------------------------------------------------
 
 
-void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection);
+void renderBackpack(shader backpackShader, Model backpackModel, glm::mat4 view, glm::mat4 projection);
 void renderRocks(shader rockShader, Model rockModel, glm::mat4 view, glm::mat4 projection);
 void generateRocks(Model rockModel);
 void renderPyramid(Shader pyramidShader, Texture2D pyramidTexture, unsigned VAO, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
@@ -99,7 +99,7 @@ void renderScene(Shader pyramidShader, Texture2D pyramidTexture,
                  Shader fireflyShader, unsigned cubeVAO,
                  Shader boxShader, Texture2D woodTexture, Texture2D metalTexture,
                  Shader obeliskShader,
-                 shader truckShader, Model truckModel,
+                 shader backpackShader, Model backpackModel,
                  shader rockShader, Model rockModel,
                  glm::mat4 view, glm::mat4 projection);
 
@@ -310,12 +310,12 @@ int main() {
     stbi_set_flip_vertically_on_load(true);
     glEnable(GL_DEPTH_TEST);
 
-    shader truckShader("resources/shaders/model_loading.vs",
+    shader backpackShader("resources/shaders/model_loading.vs",
                        "resources/shaders/model_loading.fs");
 
-//    truckShader.use();
+//    backpackShader.use();
 
-    Model truckModel(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
+    Model backpackModel(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
 
     //rock loading
 
@@ -341,7 +341,7 @@ int main() {
                     groundShader, groundTexture, VAOs,
                     fireflyShader, cubeVAO,
                     boxShader, woodTexture, metalTexture,
-                    obeliskShader, truckShader, truckModel,
+                    obeliskShader, backpackShader, backpackModel,
                     rockShader, rockModel,
                     view, projection);
 
@@ -358,7 +358,7 @@ void renderScene(Shader pyramidShader, Texture2D pyramidTexture,
                  Shader fireflyShader, unsigned cubeVAO,
                  Shader boxShader, Texture2D woodTexture, Texture2D metalTexture,
                  Shader obeliskShader,
-                 shader truckShader, Model truckModel,
+                 shader backpackShader, Model backpackModel,
                  shader rockShader, Model rockModel,
                  glm::mat4 view, glm::mat4 projection) {
     //render pyramids
@@ -376,8 +376,8 @@ void renderScene(Shader pyramidShader, Texture2D pyramidTexture,
     //render laser beams
     renderBeams(obeliskShader, cubeVAO, view, projection);
 
-    //render model truck
-    renderTruck(truckShader, truckModel, view, projection);
+    //render model backpack
+    renderBackpack(backpackShader, backpackModel, view, projection);
 
     //render model rock
     renderRocks(rockShader, rockModel, view, projection);
@@ -552,7 +552,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         fov = 45.0f;
 }
 
-void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4 projection){
+void renderBackpack(shader backpackShader, Model backpackModel, glm::mat4 view, glm::mat4 projection){
     //Model
     glm::mat4 model_model = glm::mat4(1.0f);
     model_model = glm::translate(model_model, glm::vec3(1.4, 0.1, -1.95));
@@ -560,35 +560,35 @@ void renderTruck(shader truckShader, Model truckModel, glm::mat4 view, glm::mat4
     model_model = glm::rotate(model_model, (float)glm::radians(-55.0f), glm::vec3(0.0, 1.0, 0.0));
     model_model = glm::scale(model_model, glm::vec3(0.05));
 
-    truckShader.use();
-    truckShader.setMat4("model", model_model);
-    truckShader.setMat4("view", view);
-    truckShader.setMat4("projection", projection);
+    backpackShader.use();
+    backpackShader.setMat4("model", model_model);
+    backpackShader.setMat4("view", view);
+    backpackShader.setMat4("projection", projection);
 
     //spotLight for model
-    truckShader.setFloat("spotLight.lightConst", lightConst);
-    truckShader.setFloat("spotLight.linearConst", linearConst);
-    truckShader.setFloat("spotLight.quadraticConst", quadraticConst);
-    truckShader.setInt("spotLight.spotLightFlag", spotLightFlag);
-    truckShader.setVec3("spotLight.position", cameraPos);
-    truckShader.setVec3("spotLight.direction", cameraFront);
-    truckShader.setVec3("spotLight.color", glm::vec3 (1.0f));
-    truckShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-    truckShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
+    backpackShader.setFloat("spotLight.lightConst", lightConst);
+    backpackShader.setFloat("spotLight.linearConst", linearConst);
+    backpackShader.setFloat("spotLight.quadraticConst", quadraticConst);
+    backpackShader.setInt("spotLight.spotLightFlag", spotLightFlag);
+    backpackShader.setVec3("spotLight.position", cameraPos);
+    backpackShader.setVec3("spotLight.direction", cameraFront);
+    backpackShader.setVec3("spotLight.color", glm::vec3 (1.0f));
+    backpackShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+    backpackShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(12.5f)));
 
     //firefly
-    truckShader.setFloat("pointLight.lightConst", lightConst);
-    truckShader.setFloat("pointLight.linearConst", linearConst);
-    truckShader.setFloat("pointLight.quadraticConst", quadraticConst);
-    truckShader.setVec3("pointLight.position", lightPosition);
-    truckShader.setVec3("pointLight.color", lightColor);
+    backpackShader.setFloat("pointLight.lightConst", lightConst);
+    backpackShader.setFloat("pointLight.linearConst", linearConst);
+    backpackShader.setFloat("pointLight.quadraticConst", quadraticConst);
+    backpackShader.setVec3("pointLight.position", lightPosition);
+    backpackShader.setVec3("pointLight.color", lightColor);
 
-    truckShader.setVec3("viewPos", cameraPos);
+    backpackShader.setVec3("viewPos", cameraPos);
 
     //sun light
-    truckShader.setVec3("dirLight.direction", sunLightDirection);
-    truckShader.setVec3("dirLight.color", sunLightColor);
-    truckModel.Draw(truckShader);
+    backpackShader.setVec3("dirLight.direction", sunLightDirection);
+    backpackShader.setVec3("dirLight.color", sunLightColor);
+    backpackModel.Draw(backpackShader);
 }
 
 void generateRocks(Model rockModel){
